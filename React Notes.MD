@@ -421,12 +421,35 @@ Instead of enclosing within <> </>, we can also use <React.Fragment> </React.Fra
 > 👉*React* is called "React" because...
 React **Reacts** to state changes by re-rendering the UI
 
+
+- It's better to use callback function when we want to change state based on current state
+
+  e.g.,
+
+  `const [step, setStep] = useState(1);`
+
+  `setStep((s) => s+1);`
+
+- Each component has and manages `its own state`, no matter how many times we render the same component
+
+- Multiple instances of the same component are independent of each other
   
+#### Practical Guidelines About State
+
+- Use a state variable for any data the component should keep track of ("remember") over time. **This is data that will change at some point**
+
+- Whenever you want something in the component to be **dynamic**, create a piece of state related to that "thing", and update the state when the "thing" should change.
+
+- When building a component, imagine its view as a **reflection of state changing over time.**
+
+- For data that should not trigger component re-renders, don't use state. Use a regular variable instead.
 
 
+### Controlled Elements
 
+- By default, the state of the input fields are owned by DOM so its difficult to get their values.
 
-
+- So we use controlled elements in react to control the states of input field
 
 
 
