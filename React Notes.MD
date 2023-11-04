@@ -437,7 +437,7 @@ Instead of enclosing within <> </>, we can also use <React.Fragment> </React.Fra
 
 -   For data that should not trigger component re-renders, don't use state. Use a regular variable instead.
 
-#### Global State vs Local State
+#### Global State vs Local State vs Derived State
 
 -   Local State
 
@@ -466,3 +466,7 @@ But if the two components are siblings, then we need to lift the state up, meani
 -   So we use controlled elements in react to control the states of input field
 
 -   So controlled elements are basically the elements whose values are defined by the state and it also has an event handler which listens for the change and updates the state accordingly.
+
+##### Derived State
+  - State that is computed from an existing piece of state or from props.
+
