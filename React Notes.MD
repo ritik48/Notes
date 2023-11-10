@@ -470,3 +470,40 @@ But if the two components are siblings, then we need to lift the state up, meani
 ##### Derived State
   - State that is computed from an existing piece of state or from props.
 
+
+### Children Prop
+
+- When we use any component, then instead of closing it immediately, we can use it like any normal html tags like `div` which has both opening and closing tags `<div>` and `</div>`
+
+Now in case of components, the values between the opening and closing are considered as, **children props** that can be passed. And this children props can be accessed in the component using special keyword `children`
+
+```
+
+<Button bgColor="white"
+        color="red"
+        onClick={onClick}
+> 
+<span>👉 Next </span> ------> line 1
+</Button>
+
+function Button({ bgColor, textColor, onClick, children }) {
+    return (
+        <button
+            style={{ color: textColor, backgroundColor: bgColor }}
+            onClick={onClick}
+        >
+            {children}
+        </button>
+    );
+}
+
+here, in children, line 1 will be passed
+```
+
+- The children prop **allow us to pass JSX into an element**
+- Essential tool to make **reusable** and **configurable** components
+- Really **useful for generic components** that don't know their content before being used.
+- It's great to reduce number of props passed
+
+
+
