@@ -505,5 +505,413 @@ here, in children, line 1 will be passed
 - Really **useful for generic components** that don't know their content before being used.
 - It's great to reduce number of props passed
 
+##### Prop Drilling
+
+It's a situation when a state has to be sent through several nested child component so that it could be used in some deeply nested component.
+
+It's solved using component composition.
+
+#### Component Composition
+It is combining different components using the **children** prop (or explicitly defined props)
+
+e.g,
+
+```
+function Modal() {
+  return (
+    <div className="modal>
+      <Success />
+    </div>
+  );
+}
+
+function Success() {
+  return <p>It's done.</p>;
+}
+
+The way modal component is structured, it cannot be reused. 
+Let's say in the modal I want to display An Error componet, then we cannot do so, as Success component is explicitly defined there. 
+
+We can use the Modal component as the following to make it reusable:
+
+- by children prop
+
+function Modal({children}) {
+  return (
+    <div className="modal>
+      {children}
+    </div>
+  );
+}
+
+<Modal>
+  <Success />
+<Modal />
 
 
+- by explicitly defined props
+
+function Modal({anyname}) {
+  return (
+    <div className="modal>
+      {anyname}
+    </div>
+  );
+}
+
+<Modal anyname={<Success />}> />
+
+```
+
+With component composition, we can:
+- Create highly reusable and flexible components.
+- Fix prop drilling (great for layouts)
+
+
+### Component vs Instance vs Element
+
+![Alt text](images/image-5.png)
+
+#### Component
+
+![Alt text](images/image-1.png)
+
+- **Description** of a piece of UI
+- A component is a function that **returns React elements** (element tree), usually written as JSX
+- "Blueprint" or "Template"
+
+#### Instance
+
+![Alt text](images/image-2.png)
+
+- Instances are created when we **"use"** the component.
+- Actual **physical manifestation** of a component
+- Has its own state and props.
+- Has a **lifecycle** (can "be born", "live" and "die")
+
+#### React Element
+
+![Alt text](images/image-3.png)
+
+- A component instance is what returns **React Element**
+- JSX is converted to React.createElement() **function calls**
+- A React Element is the result of these function calls
+- React Element contains the necessary information to create **DOM Elements**
+
+#### DOM Element (HTML)
+
+![Alt text](images/image-4.png)
+
+- Actual **visual representaion** of the component instance in the browser
+
+
+## How Components are Displayed on the screen ?
+
+![Alt text](images/image-6.png)
+
+
+### Step 1: Render is Triggered
+
+The two situations that trigger renders:
+  1. Initial render of the application
+  2. State is updated in one or more component instances (re-render)
+
+- The render process is triggered for the entire application but it doesn't mean that all components are redrawn, because in **React Rendering is only about calling the component function and figuring out what need to change in the DOM later**.
+
+- **In practice**, it looks like React only re-renders the component where the state update happens, but that's not how it **works behind the scenes**
+
+- Renders are **not** triggered immediately, but **scheduled** when the JS engine has some "free time". There is also batching of multiple setSate calls in event handlers.
+
+
+### Step 2: Render Phase
+
+#### Initial Render
+
+![Alt text](images/image-7.png)
+
+  Take the entire component tree and create it into a React Element tree , which is also called **Virtual DOM**. 
+
+  **Vitual DOM:** Tree of all React elements created from all instances in the component tree. It is bascially representation of a UI which is kept in memory and synced with the "Real" DOM, and this process is called **Reconciliation**.
+
+- Cheap and fast to create multiple trees as virtual DOM is just a javascript object.
+
+![Alt text](images/image-8.png)
+
+Now let's say, there is a state update in component D (in the above photo), this will trigger re-render, which means React will call the function of Component D and place the new React element in the new React element tree(Virtual DOM).
+
+    Rendering a component will cause all of its child components to be rendered as well (no matter if props changed or not)
+  
+  The above action is necessary, because React doesn't know whether the children will be affected. But this doesn't mean that entire DOM is updated, its just the Virtual DOM that will be re-created.
+
+![Alt text](images/image-9.png)
+
+The new virtual DOM that was created after the state update will now get **Reconciled** with the **Fiber Tree** (as it existesd before state update)
+
+This reconcilation of the fiber tree is done by the **React's Reconciler** which is called **Fiber**.
+
+The **result** of this **reconciliation** process will be an **updated Fiber Tree** that will eventually be **used to write to the DOM**
+
+**Why need Reconciliation ?**
+**Why not update the entire DOM whenever state changes somewhere in the app ?**
+
+Entire DOM is not updates because that would be inefficient and wasteful as:
+- Writing to the DOM is (relatively) **slow**
+- Unsually only a **small part of the DOM** needs to be updated and the rest remains the same.
+
+Whenever a render is triggered, React **reuses** as musch of the **existing DOM** as possible.
+
+The above resuing part is done in Reconciliation process.
+
+**Reconciliation:** Deciding which DOM elements actually need to be inserted, deleted, or updated, in order to reflect the latest state changes
+
+#### The Reconciler: FIBER
+
+![Alt text](images/image-10.png)
+
+In the initial render, Fiber takes the entire React Element Tree(virtual DOM) and creates a Fiber Tree.
+
+**Fiber Tree:** 
+- internal tree that has a "fiber" for each component instance and DOM element.
+
+- Fibers are **NOT** re-created on every render
+Fiber just mutates in the future reconciliation steps.
+This is what make Fibers a perfect place to keep track of the current component state, props, list of used hooks and more.
+
+Each Fiber also contains a queue of work to do. Like updating state, updating ref, performing DOM update that's why Fiber is also defined as unit of work.
+
+The elemnts in Fiber tree are arranged in a different way as compared to React element tree.
+
+Fiber tree has a **structure** of a **linked list**.
+Here, each first child has link to it's parent and all the other children has link to it's previous sibling.
+It makes it easier to process the work associated with each Fiber.
+
+The work can be done **asynchronously** 
+Rendering process can be split into chunks, taks can be prioritized, and work can be **paused**, **resused**, or **thrown away**.
+
+This asynchronous rendering:
+- enables **concurrent feature** like Sspense or transitions
+- Long renders  **won't block** JS engine
+
+and this all is only possible because the render state doesn't produce any visible output to the DOM yet.
+
+#### Reconciliation in ACTION
+
+![Alt text](images/image-13.png)
+
+
+Let's understand with the xample in photo.
+
+Initially the showModal = true, now when the state changes to false, it will: trigger re-render, which will then create a new virtual DOM.
+
+![Alt text](images/image-16.png)
+
+
+Now, the new Vitual DOM needs to be Reconciled with the current Fiber Tree which will then result in updated Fiber Tree  which internally is called **workInProgress Tree**
+
+Whenever reconciliation needs to happen, Fiber wals the entire tree step-by-step and analyses exactly what needs to be changed between the current Fiber Tree and the  Updated Fiber Tree based on new Virtual DOM.
+
+This process of comparing elements step-by-step based on their position in the tree is called **Diffing**
+
+In the updated Fiber Tree:
+
+![Alt text](images/image-17.png)
+
+Btn - this component is marked as **DOM update** as it's text needs to be changed to "hide"
+
+and the components : **Modal, Overlay, h3 and button,** are **marked** for **DOM Deletion** as they are no longer present in the new updated DOM.
+
+and in case of Video component, it got re-renderd as it's a child of App component but it didn't change so DOM won't get updated in this case.
+
+Now, once this process is over, all these DOM mutations will be place in a list called **list of effects**. Which will be used in next phase called Commit Phase to actually mutate the DOM.
+
+It means till now React still not had written anything to DOM yet, but it has figured out what all changes needs to be made based on the list of effects.
+
+
+RENDER PHASE *gave* **LIST OF DOM UPDATES**
+
+### Step 3: COMMIT Phase
+
+![Alt text](images/image-18.png)
+
+- **React writes to the DOM:** insertions, deletions, and updates ( list of DOM updates are "flushed" to the DOM )
+
+- **Committing is synchronous:** DOM is updates in one go, it can't be interrupted. This is necessary so that the DOM never shows partial results, ensureing a consistent UI.
+
+- After the commit phase completes, the *workInProgress* fiber tree becomes the current tree **for the next render cycle**
+
+**Writing to the DOM**, is the **wor**k of a separate library called **ReactDOM.**
+
+> React does **not** touch the DOM. React **only renders**. It doesn't know where the render result will go.
+
+Step 4: Browser Paints the updated DOM
+
+![Alt text](images/image-19.png)
+
+
+### How Diffing works ?
+
+Diffing uses 2 fundamental assumptions (rules) : 
+- Two elements of different types will **produce different trees**
+- Elements with a stable key prop stay the same across renders
+
+>This allows React to go from 1,000,000,000 [O(n^3)]to 1000 [O(n)] operations per 1000 element
+
+1. Same Position, Different Element
+
+![Alt text](images/image-20.png)
+
+- React assumes entire subtree is no longer valid.
+- Old components are destroyed and removed from DOM, including state.
+- Tree might be rebuilt if children stayed the same (state is reset)
+
+2. Same Position, Same Element
+
+![Alt text](images/image-21.png)
+
+- Element will be kept (as well as child elements), including state.
+- New props/ attributes are passed if they changed between renders. **important**
+- Sometimes this is not what we want. Then we can use the key prop.
+
+
+### Key Prop
+
+- Special prop which tells the diffing algorithm that an element is **unique.**
+
+- Allows React to **distinguish** between multiple instances of the same component type
+
+- When a key **stays the same across renders**, the element will be kept in the DOM (even if the position in the tree changes)
+
+  - keys in the list items
+
+- When a key **changes between renders**, the element will be destroyed and a new one will be created ( even if the position in the tree is the same as before )
+
+  - Key prop to reset state ( changing key )
+
+![Alt text](images/image-22.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Reconciliation vs Diffing
+
+In React, reconciliation and "diffing" are terms often used in the context of the virtual DOM and the process of updating the actual DOM based on changes in the virtual DOM. Let's explore each concept:
+
+### Reconciliation:
+
+**Definition:** 
+Reconciliation is the process of updating the actual DOM to match the virtual DOM efficiently. It involves comparing the new virtual DOM tree with the previous one and determining the minimum number of changes needed to update the actual DOM.
+
+**Purpose:** 
+The goal of reconciliation is to optimize the rendering process by minimizing the number of updates to the DOM. React aims to make these updates as efficient as possible to improve performance.
+
+**Algorithm:**
+ React uses a diffing algorithm during the reconciliation process to identify the differences between the new and old virtual DOM trees. The algorithm then generates a minimal set of instructions for updating the actual DOM.
+
+
+### Diffing:
+
+**Definition:**
+Diffing, short for "difference algorithm," is the specific algorithm used during reconciliation to compare two virtual DOM trees and identify the changes between them.
+
+**Process:** 
+The diffing process involves comparing nodes in the old and new virtual DOM trees and determining whether an update is needed. React's algorithm, often referred to as the "Virtual DOM Diffing Algorithm," is responsible for efficiently identifying the minimum set of changes required to update the DOM.
+
+**Efficiency:** 
+React's diffing algorithm is designed to be efficient, taking advantage of heuristics and optimizations to minimize the time and resources required for the reconciliation process.
+
+In summary, reconciliation is the broader process of updating the actual DOM based on changes in the virtual DOM, and diffing is the specific algorithm used within reconciliation to identify the differences between the old and new virtual DOM trees. React's diffing algorithm plays a crucial role in making this process efficient, helping to deliver optimal performance in updating the UI.
+
+
+
+### How state updates are **BATCHED ?**
+
+When the state is changes using useState(), then newly updated state is not immediately available to us. It's available only after the re-render.
+
+![Alt text](images/image-23.png)
+
+Let's say we are changing 3 states in our handler function, then it doesn't mean that react will re-render the component 3 times. Instead, these state upates get batched, and a single re-render and commit is done by react per event handler.
+
+![Alt text](images/image-25.png)
+
+React 18, provides automatic batching functionality.
+ 
+Before React 18, automatic batching inside timeouts, promises and native event caller(el.addEventListener()) didn't happen. But this was overcome in React 18.
+
+- This state updating is asynchronous.
+
+- We can **opt out** of automatic batching by wrapping a state update in ReactDOM.flushSync()
+
+
+```
+function handler() {
+  setLike(like + 1);
+  setLike(like + 1);
+  setLike(like + 1);
+}
+```
+
+the above function tries to increase the like 3 times, but it won't happen as the update like value is not available immediately.
+
+So, here we need to change the state based on the current state value. That's why we use callback function to update state (like below).
+
+```
+function handler() {
+  setLike((like) => like + 1);
+  setLike((like) => like + 1);
+  setLike((like) => like + 1);
+}
+```
+
+here, in the callback function we get the access to updated like value.
+
+
+### Framework vs Library
+
+
+#### Framework
+
+- 👍 Everything we need to build a complete application is **included** in the framework
+
+- 👎 You are stuck with the frameworks tools and conventions (which is not always bad)
+
+- Vue, Angular
+
+#### Library
+
+- 👍 You can **choose multiple 3rd party library** to build a complete application.
+
+- 👎 You need to **research, download, learn and stay-up-to-date** with multiple external libraries.
+
+- React
+
+#### React 3rd party library Ecosystem
+
+![Alt text](images/image-26.png)
+
+#### Frameworks built on top of React
+
+- NextJs, Remix, Gatsby
+
+![Alt text](images/image-27.png)
+
+### Summary of Above
+
+![Alt text](images/image-28.png)
+
+![Alt text](images/image-29.png)
+
+![Alt text](images/image-30.png)
