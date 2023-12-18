@@ -915,3 +915,90 @@ here, in the callback function we get the access to updated like value.
 ![Alt text](images/image-29.png)
 
 ![Alt text](images/image-30.png)
+
+## Effects and Data Fetching
+
+### Component Lifecycle
+
+![Alt text](images/image-31.png)
+
+
+#### Side effect:
+It is basically an *"interaction between a React component and the world outside the component".* We can also think of a side as *"Code that actually does something".* **Examples:** Data fetching, setting up subscriptions, setting up timers, manually accessing the DOM, etc.
+
+We need side effects all the time. They make our applications do something. **Not** in render logic!
+
+- Can be made in:
+  - Event handlers (onClick, onSubmit, etc)
+  - Effects (allows us to write code that will run at **different moments:** mount, re-render, or un-mount)
+
+
+### useEffect hook
+
+Many times it's required to fetch some data from an api as soon as the component is rendered.
+But, we can't provide the fecth logic in the render ogic of the component as it will create an infinite re-rendering of the component (side effect).
+
+So, we use useEffect hook, which is used to run certain function at different parts of component lifecycle i.e, at the initial render, on re-render or when the component un-mounts/removed.
+
+e.g., useEffect to make an api call after the component has rendered.
+
+```
+  function App() {
+    const [movies, setMovies] = useState([]);
+
+    useEffect(functon () {
+      fetch('https://apicall.com')
+      .then((res) => res.json())
+      .then((data => setMovies(data)));
+    }, []);
+
+    // the second argument of the useEffect is called the dependency list. Here, it's an empty list, it means, the effect will run only on the first mount/when the app component renders for the very first time.
+  }
+```
+
+### Effects vs Event Handlers
+
+![Alt text](images/image-32.png)
+
+*Using async function in effect*
+effect function that we put inside useEffect() cannot return promise. 
+So, we need to define another function inside the effect function, which will then return promise.
+
+```
+  function App() {
+    const [movies, setMovies] = useState([]);
+
+    useEffect(functon () {
+      async function fetchMovie() {
+          const res = await fetch('https://apicall.com')
+          const data = await res.json();
+
+          setMovies(data);
+      }
+      fetchMovie();
+    }, []);
+  }
+
+```
+
+### What's the useEffect Dependency array ?
+
+- By default, effects run **after every render**. we can prevent that by passing a dependency array.
+
+- Without the dependency array, React doesn't know **when** to run the effect.
+
+- **Each time one of the dependencies changes, the effect will be executed again**.
+
+- **Every state variable and prop used in the effect must be included in the dependency array**
+
+![Alt text](images/image-33.png)
+
+![Alt text](images/image-34.png)
+
+![Alt text](images/image-35.png)
+
+**Effects are executed after the browser has painted the component instance.**
+
+![Alt text](images/image-36.png)
+
+
