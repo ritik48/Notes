@@ -574,7 +574,7 @@ With component composition, we can:
 
 #### Component
 
-![Alt text](images/image-1.png)
+![Alt text](images/images/image-37.png)
 
 - **Description** of a piece of UI
 - A component is a function that **returns React elements** (element tree), usually written as JSX
@@ -582,7 +582,7 @@ With component composition, we can:
 
 #### Instance
 
-![Alt text](images/image-2.png)
+![Alt text](images/images/image-38.png)
 
 - Instances are created when we **"use"** the component.
 - Actual **physical manifestation** of a component
@@ -591,7 +591,7 @@ With component composition, we can:
 
 #### React Element
 
-![Alt text](images/image-3.png)
+![Alt text](images/images/image-39.png)
 
 - A component instance is what returns **React Element**
 - JSX is converted to React.createElement() **function calls**
@@ -1000,5 +1000,149 @@ So, we need to define another function inside the effect function, which will th
 **Effects are executed after the browser has painted the component instance.**
 
 ![Alt text](images/image-36.png)
+
+
+### cleanup functions in useEfect
+
+- Function that we can **return from an effect**(optional)
+
+- Runs on two occasions:
+  - Before the effect is **executed again** in order to clear the results of previous side effect
+  - After a component has **unmounted**
+
+cleanup function can be used in case like:
+when we are making http request in effect. 
+If the component re-renders while the first request is still running then a new second request will be fired off, which might create a bug called race condition. 
+
+Therfore its a good idea to cancel the request in a clean up function whenever the component re-renders or unmounts.
+
+![Alt text](images/image-40.png)
+
+----------------------------------
+
+## React Hooks
+
+- Special built-in functions that allow us to **"hook" into React internals:**
+  - Creating and accessing state from Fiber tree
+  - Registering **side effects** in Fiber tree
+  - Manual **DOM Selection**
+  - Many more...
+
+- Always start with **"use"** (useEffect, useState, etc.)
+- Enable easy **reusing of non visual logic:** we can compose multiple hooks into our own **custom hooks**
+
+- Give **function components** the ability to own state and run side effects at different lifecycle points ( before v16.8 only available in class **components**)
+
+Some built-in hooks:
+- useState
+- useEffect
+- useReducer
+- useContext
+- useRef
+- useCallback
+- useMemo
+- useTransition
+- useDeferredValue
+
+### Rules of hooks:
+1. **Only call hooks at the top level**
+  - D **NOT** call hooks inside **conditionals, loops, nested functions,** or after an **early return**
+  - This is necessary to ensure that hooks are always called in the **same order**
+
+2. **Only call hooks from React functions**
+  - Only call hooks inside a **function component** or a **custom hook**
+
+*Note: These rules are **automatically enforced by** React's ESLint rules*
+
+![Alt text](images/image-37.png)
+
+
+#### There are two ways to initialize state in useState hook
+
+- const [name, setName] = useState(0) -> passing the value in the hook
+- passing function inside the hook 
+  - it's done when the state needs value based on some computation
+  const [name, setName] = useState(function() {
+    return localStorage.getItem('name');
+  })
+
+
+### useRef hook
+
+- It let's you reference a value that's not needed for rendering
+- It's basically an object which has **mutable** property that is **persisted across renders**
+
+- Two big use cases:
+  1. **Creating a variable thats stays the same between renders**(***e.g.previous state, setTimeout, etc.***)
+  2. **Selecting and storing the DOM element**
+
+- Refs are for **data that is NOT rendered:** usually only appear in event handlers or effects, not in JSX (otherwise use state)
+
+- Do **NOT** read write in render logic(like state)
+
+- Calue of ref is accessed using `.current`
+
+![Alt text](images/image-38.png)
+
+#### Similarities between Refs and State
+
+- Both persists the data across renders
+
+#### Difference between Refs and State
+
+- Re-renders
+  - State: updating state causes re-render
+  - Ref: updating ref do not causes re-render
+
+- Mutablity
+  - State: immutable
+  - Refs: mutable
+
+- Asynchronous
+  - State: updates are asynchronous, so we cannot use new state just after the update
+  - Refs: update is synchronous, so we can use the new ref just after the update
+
+Examples:
+
+1. *Using ref to count number of re-renders*
+
+    If we tried to count how many times our application renders using the useState Hook, we would be caught in an infinite loop since this Hook itself causes a re-render.
+
+    ```
+    const [inputValue, setInputValue] = useState("");
+      const count = useRef(0);
+
+      useEffect(() => {
+        count.current = count.current + 1;
+      });
+    ```
+
+2. *Using ref to focus an input element*
+
+    ```
+    function Search() {
+      const inputEl = useref(null);
+
+      useEffect(function() {
+        inputEl.current.focus();
+      }, []);
+
+      return <input className="search"
+              ref={inputEl}> 
+    }
+    ```
+
+### Custom Hooks
+
+- A resuable function which uses one or more react hooks
+- Allows us to reuse **non-visual logic** in multiple components
+- One custom hook should have **one purpose**, to make it **resuable** and **portable** (even across multiple projects)
+- Function name needs to start with `use`
+
+- Unlike components, can receive and return **any relevant data**
+
+  ![Alt text](images/image-39.png)
+
+
 
 
