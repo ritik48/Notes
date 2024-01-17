@@ -1145,4 +1145,62 @@ Examples:
 
 
 
+## useReducer Hook
+```
+const [count, dispatch] = useReducer(reducer, 0);
+```
 
+- it takes two values: 
+  1. a reducer function
+  2. initial state (here 0)
+
+reducer(): this function takes two arguments **state** and **action**
+  - state is the initial state
+  - action is the value which we will use to modify the state
+
+```
+function reducer(state, action) {
+  console.log(state, action) // comment
+  return state + action;
+}
+```
+
+count: stores the state value
+dispatch: used to change the state
+
+**dispatch(2):**
+this will call the reducer function, and whatever the function returns, will be set as the new state.
+
+**the line 1161:** will give output as 0, 2
+and the new state will be 0+2 = 2
+
+### Why useReducer ?
+
+State Management With useState is not enough in certain situations:
+
+1. When components have **a lot of state variables and state updates,** spread across many event handlers **all over the component**
+
+2. When **multiple state updates** need to happen **at the same time** (as a reaction to the same event, like "starting a game")
+
+3. When updating one piece of state **depends on one or multiple other pieces of state**
+
+**In all these situations, useReducer Can be of great help**
+
+### Managing state with useReducer
+
+![Alt text](images/image-41.png)
+
+- An alternative way of setting state, ideal for **complex state** and **related pieces of state**
+
+- Stores related pieces of state in a **state** object
+
+- useReducer needs **reducer:** function containing **all logic to update state. *Decouples state logic from component***
+
+- **reducer:** pure function (**no side effects**) that takes current state and action, **and returns the next state**
+
+- **action:** object that describes **how to update state** (contains *type* and *payload* type: shows what type of state update , 
+payload: is the value to be used to update state
+**type and payload are standard naming convention, but can be named anything**
+)
+
+- **dispatch:** function to trigger state updates, by **"sending" actions** from **event handlers** to the **reducer**
