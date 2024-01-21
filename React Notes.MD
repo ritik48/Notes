@@ -1171,7 +1171,7 @@ dispatch: used to change the state
 **dispatch(2):**
 this will call the reducer function, and whatever the function returns, will be set as the new state.
 
-**the line 1161:** will give output as 0, 2
+**the line 1163:** will give output as 0, 2
 and the new state will be 0+2 = 2
 
 ### Why useReducer ?
@@ -1204,3 +1204,7 @@ payload: is the value to be used to update state
 )
 
 - **dispatch:** function to trigger state updates, by **"sending" actions** from **event handlers** to the **reducer**
+
+### Analogy to understand useReducer
+
+![Alt text](images/image-42.png)
