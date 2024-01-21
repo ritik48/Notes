@@ -1166,6 +1166,7 @@ function reducer(state, action) {
 ```
 
 count: stores the state value
+
 dispatch: used to change the state
 
 **dispatch(2):**
