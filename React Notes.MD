@@ -99,7 +99,7 @@ root.render(
 -   **Declarative syntax** to **describe** what components **look like** and **how they work**.
 
 -   **Components must return** a block of **JSX**
--   **Extension of JavaScipt that allows us to embed JavaScript, CSS, and React components into HTML.**
+-   **Extension of JavaScipt that allows us to embedd JavaScript, CSS, and React components into HTML.**
 
 -   JSX is converted to javascript using a tool called Babel. it is automatically included in project when creating a project.
 
