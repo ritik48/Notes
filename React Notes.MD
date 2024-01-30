@@ -1209,3 +1209,86 @@ payload: is the value to be used to update state
 ### Analogy to understand useReducer
 
 ![Alt text](images/image-42.png)
+
+---
+
+### Setting up react project using vite
+
+1. Create project
+   - `npm create vite@latest`
+2. Setup eslint
+   - Vite doesn't configure eslint for us. We have to do it manually.
+   - `npm install eslint vite-plugin-eslint eslint-config-react-app --save-dev`
+3. Create file .eslintrc.json and add some rules
+   - `{
+        "extends": "react-app"
+     }`
+     This will make eslint to use rules predefines in the package we installed
+4. Configure vite.config.js file
+    - Add eslint plugin to the plugins array
+
+      `import eslint from 'vite-plugin-eslint`
+
+      `plugins: [react(), eslint()]`
+
+---
+
+### Routing
+
+- With routing, we match **different urls** to **different UI views** (React components): **routes**
+
+- This enables users to **navigate between different applications screens**, using the browser url
+
+- Keeps the UI **in sync** with the current browser URL
+
+- Allows us to build **single page applications(SPA)**
+
+> **ReactRouter -> 3rd party library used for Routing**
+> `npm i react-router-dom`
+
+---
+
+### <u>Single-Page Applications (SPA)</u>
+
+- Application that is **executed entirely on the client (browsers)**
+
+- **Routes:** different URLs correspond to different views (components)
+
+- **Javascript** is used to update the page (DOM)
+- **The page is never reloaded** as based on url a componet is rendered.
+- This functionality gives a feel of a **native app**
+
+
+#### <u>SPA Running on client</u>
+
+1. User clicks router link
+2. Url is changed this result in re-render
+3. DOM is updated: React component corresponding to the new URL is rendered.
+
+---
+Adding Router to the Application
+
+```
+import {BrowserRouter, Routes, Route} from 'react-router-dom';
+
+function App() {
+  return (
+    <>
+      <h1>React Router</h1>
+
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="product" element={<Product />} />
+          <Route path="About" element={<About />} />
+        </Routes>
+      </BrowserRouter>
+    </>
+  )
+}
+
+```
+*Here, h1 tag will be on every page. And the element whose route matches the url will be rendered.*
+
+
+
