@@ -1290,5 +1290,60 @@ function App() {
 ```
 *Here, h1 tag will be on every page. And the element whose route matches the url will be rendered.*
 
+#### Linking between Routes with `<Link />` and `<NavLink />`
 
+- If we use 'a' tag, to siwtch to different routes, then whole page refreshes which is not what we want.
+
+- `<Link to = "/home"> Home </Link>` this will render the home component without refreshing the page. It just updates the dom.
+
+- `<NavLink to = "/home"> Home </NavLink>` with NavLink, it gets extra class "active" when it is selected, and then we can style the active link based on it. 
+
+
+#### Using CSS modules
+
+- We use this to have different css files for every component
+
+- use extesnion `.module.css` for naming the css file. e.g., `NavBar.module.css`
+
+<u>NavBar.module.css</u>
+```
+.nav {
+  display: flex;
+  justify-content: center;
+}
+```
+
+Using above css in a component:
+
+<u>NavBar.jsx</u>
+```
+import styles from "NavBar.module.css
+
+function NavBar() {
+  return (
+    <nav className={style.nav}></nav>
+  )
+}
+```
+When we inspect the page, then we will find out that our nav tag don't has the class 'nav' instead, a random string is appended to it.
+
+This is done so that, if we use nav class in some other component then it don't clashes. Makit every class unique.
+
+***To add a global style from inside module.css***
+
+Let's say we want a class in a module to be accessible everywhere.
+
+To do that:
+
+```
+:global(.test) {
+  color: "red"
+}
+
+Now, test class can be used everywhere.
+```
+- We have to use :global because, when we write just `.test` then css module will add random string to it. To avoid this we need to follow the above approach.
+
+
+- We are required to do above thing in cases when we get classes from external sources. For example, when we use <NavLink /> then it gives us 'active' class which we can use to style the currently active link. So we can use global function to select .active.
 
