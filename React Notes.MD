@@ -1324,7 +1324,9 @@ function NavBar() {
     <nav className={style.nav}></nav>
   )
 }
+
 ```
+
 When we inspect the page, then we will find out that our nav tag don't has the class 'nav' instead, a random string is appended to it.
 
 This is done so that, if we use nav class in some other component then it don't clashes. Makit every class unique.
@@ -1335,15 +1337,68 @@ Let's say we want a class in a module to be accessible everywhere.
 
 To do that:
 
-```
-:global(.test) {
-  color: "red"
-}
-
-Now, test class can be used everywhere.
-```
 - We have to use :global because, when we write just `.test` then css module will add random string to it. To avoid this we need to follow the above approach.
 
 
 - We are required to do above thing in cases when we get classes from external sources. For example, when we use <NavLink /> then it gives us 'active' class which we can use to style the currently active link. So we can use global function to select .active.
 
+### Storing state in url using params and quesry string
+
+- **useParams() hook**
+
+  We can pass parameter from one page to other via routes.
+
+  This parameter/data can be used in other page to show some important stuffs.
+
+  like:
+  `<Route path="/project/:title" element={<Project />}>`
+
+  In the above route, we are going to /project but we also have option to give aparameter `title`. Based on this title, in the <Project /> that particular data will be shown which matches it.
+
+  and in <Project /> component we can access that params using `useParams()` hook.
+
+  ```
+  const data = useParams();
+  output: {'title': something}
+  ```
+
+- useSearchParams() : for getting query string from url
+
+  `/projects?type=frontend&status=complete`
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const type = searchParams.get("type");
+  const status = searchParams.get("status");
+
+  we can change the wuery params using `setSeacrhParams`
+
+  setSearchPArams({status: "incomplete"})
+
+
+#### useNavigate()
+
+It'used to programmatically move to other route without using a Link.
+
+For example: when a user submits a form we would want to go to other page. This can be achieved using this hook.
+
+```
+const navigate = useNavigate();
+
+<button onClick={() => navigate("home")}></button>
+
+```
+
+we can also go back and forward and backward using useNavigate()
+
+useNavigate(-1) will take one step back i.e, previous page
+
+#### Navigate
+
+Navigate is basically useNavigate() converted into a React component. This makes it easy to implement in our React apps.
+```
+<Route path="/auth" exact element={() => (!user ? <Auth /> : <Navigate to="/posts" />)} />
+</Routes>
+```
+
+Here, the Navigate component redirects the user to posts section on getting rendered.
+This happend IF the user is logged in(user object is present).
