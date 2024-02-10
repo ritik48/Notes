@@ -468,12 +468,12 @@ But if the two components are siblings, then we need to lift the state up, meani
 -   So controlled elements are basically the elements whose values are defined by the state and it also has an event handler which listens for the change and updates the state accordingly.
 
 ##### Derived State
-  - State that is computed from an existing piece of state or from props.
 
+-   State that is computed from an existing piece of state or from props.
 
 ### Children Prop
 
-- When we use any component, then instead of closing it immediately, we can use it like any normal html tags like `div` which has both opening and closing tags `<div>` and `</div>`
+-   When we use any component, then instead of closing it immediately, we can use it like any normal html tags like `div` which has both opening and closing tags `<div>` and `</div>`
 
 Now in case of components, the values between the opening and closing are considered as, **children props** that can be passed. And this children props can be accessed in the component using special keyword `children`
 
@@ -482,7 +482,7 @@ Now in case of components, the values between the opening and closing are consid
 <Button bgColor="white"
         color="red"
         onClick={onClick}
-> 
+>
 <span>👉 Next </span> ------> line 1
 </Button>
 
@@ -500,10 +500,10 @@ function Button({ bgColor, textColor, onClick, children }) {
 here, in children, line 1 will be passed
 ```
 
-- The children prop **allow us to pass JSX into an element**
-- Essential tool to make **reusable** and **configurable** components
-- Really **useful for generic components** that don't know their content before being used.
-- It's great to reduce number of props passed
+-   The children prop **allow us to pass JSX into an element**
+-   Essential tool to make **reusable** and **configurable** components
+-   Really **useful for generic components** that don't know their content before being used.
+-   It's great to reduce number of props passed
 
 ##### Prop Drilling
 
@@ -512,6 +512,7 @@ It's a situation when a state has to be sent through several nested child compon
 It's solved using component composition.
 
 #### Component Composition
+
 It is combining different components using the **children** prop (or explicitly defined props)
 
 e.g,
@@ -529,8 +530,8 @@ function Success() {
   return <p>It's done.</p>;
 }
 
-The way modal component is structured, it cannot be reused. 
-Let's say in the modal I want to display An Error componet, then we cannot do so, as Success component is explicitly defined there. 
+The way modal component is structured, it cannot be reused.
+Let's say in the modal I want to display An Error componet, then we cannot do so, as Success component is explicitly defined there.
 
 We can use the Modal component as the following to make it reusable:
 
@@ -564,9 +565,9 @@ function Modal({anyname}) {
 ```
 
 With component composition, we can:
-- Create highly reusable and flexible components.
-- Fix prop drilling (great for layouts)
 
+-   Create highly reusable and flexible components.
+-   Fix prop drilling (great for layouts)
 
 ### Component vs Instance vs Element
 
@@ -576,52 +577,50 @@ With component composition, we can:
 
 ![Alt text](images/images/image-37.png)
 
-- **Description** of a piece of UI
-- A component is a function that **returns React elements** (element tree), usually written as JSX
-- "Blueprint" or "Template"
+-   **Description** of a piece of UI
+-   A component is a function that **returns React elements** (element tree), usually written as JSX
+-   "Blueprint" or "Template"
 
 #### Instance
 
 ![Alt text](images/images/image-38.png)
 
-- Instances are created when we **"use"** the component.
-- Actual **physical manifestation** of a component
-- Has its own state and props.
-- Has a **lifecycle** (can "be born", "live" and "die")
+-   Instances are created when we **"use"** the component.
+-   Actual **physical manifestation** of a component
+-   Has its own state and props.
+-   Has a **lifecycle** (can "be born", "live" and "die")
 
 #### React Element
 
 ![Alt text](images/images/image-39.png)
 
-- A component instance is what returns **React Element**
-- JSX is converted to React.createElement() **function calls**
-- A React Element is the result of these function calls
-- React Element contains the necessary information to create **DOM Elements**
+-   A component instance is what returns **React Element**
+-   JSX is converted to React.createElement() **function calls**
+-   A React Element is the result of these function calls
+-   React Element contains the necessary information to create **DOM Elements**
 
 #### DOM Element (HTML)
 
 ![Alt text](images/image-4.png)
 
-- Actual **visual representaion** of the component instance in the browser
-
+-   Actual **visual representaion** of the component instance in the browser
 
 ## How Components are Displayed on the screen ?
 
 ![Alt text](images/image-6.png)
 
-
 ### Step 1: Render is Triggered
 
 The two situations that trigger renders:
-  1. Initial render of the application
-  2. State is updated in one or more component instances (re-render)
 
-- The render process is triggered for the entire application but it doesn't mean that all components are redrawn, because in **React Rendering is only about calling the component function and figuring out what need to change in the DOM later**.
+1. Initial render of the application
+2. State is updated in one or more component instances (re-render)
 
-- **In practice**, it looks like React only re-renders the component where the state update happens, but that's not how it **works behind the scenes**
+-   The render process is triggered for the entire application but it doesn't mean that all components are redrawn, because in **React Rendering is only about calling the component function and figuring out what need to change in the DOM later**.
 
-- Renders are **not** triggered immediately, but **scheduled** when the JS engine has some "free time". There is also batching of multiple setSate calls in event handlers.
+-   **In practice**, it looks like React only re-renders the component where the state update happens, but that's not how it **works behind the scenes**
 
+-   Renders are **not** triggered immediately, but **scheduled** when the JS engine has some "free time". There is also batching of multiple setSate calls in event handlers.
 
 ### Step 2: Render Phase
 
@@ -629,19 +628,19 @@ The two situations that trigger renders:
 
 ![Alt text](images/image-7.png)
 
-  Take the entire component tree and create it into a React Element tree , which is also called **Virtual DOM**. 
+Take the entire component tree and create it into a React Element tree , which is also called **Virtual DOM**.
 
-  **Vitual DOM:** Tree of all React elements created from all instances in the component tree. It is bascially representation of a UI which is kept in memory and synced with the "Real" DOM, and this process is called **Reconciliation**.
+**Vitual DOM:** Tree of all React elements created from all instances in the component tree. It is bascially representation of a UI which is kept in memory and synced with the "Real" DOM, and this process is called **Reconciliation**.
 
-- Cheap and fast to create multiple trees as virtual DOM is just a javascript object.
+-   Cheap and fast to create multiple trees as virtual DOM is just a javascript object.
 
 ![Alt text](images/image-8.png)
 
 Now let's say, there is a state update in component D (in the above photo), this will trigger re-render, which means React will call the function of Component D and place the new React element in the new React element tree(Virtual DOM).
 
     Rendering a component will cause all of its child components to be rendered as well (no matter if props changed or not)
-  
-  The above action is necessary, because React doesn't know whether the children will be affected. But this doesn't mean that entire DOM is updated, its just the Virtual DOM that will be re-created.
+
+The above action is necessary, because React doesn't know whether the children will be affected. But this doesn't mean that entire DOM is updated, its just the Virtual DOM that will be re-created.
 
 ![Alt text](images/image-9.png)
 
@@ -655,8 +654,9 @@ The **result** of this **reconciliation** process will be an **updated Fiber Tre
 **Why not update the entire DOM whenever state changes somewhere in the app ?**
 
 Entire DOM is not updates because that would be inefficient and wasteful as:
-- Writing to the DOM is (relatively) **slow**
-- Unsually only a **small part of the DOM** needs to be updated and the rest remains the same.
+
+-   Writing to the DOM is (relatively) **slow**
+-   Unsually only a **small part of the DOM** needs to be updated and the rest remains the same.
 
 Whenever a render is triggered, React **reuses** as musch of the **existing DOM** as possible.
 
@@ -670,12 +670,13 @@ The above resuing part is done in Reconciliation process.
 
 In the initial render, Fiber takes the entire React Element Tree(virtual DOM) and creates a Fiber Tree.
 
-**Fiber Tree:** 
-- internal tree that has a "fiber" for each component instance and DOM element.
+**Fiber Tree:**
 
-- Fibers are **NOT** re-created on every render
-Fiber just mutates in the future reconciliation steps.
-This is what make Fibers a perfect place to keep track of the current component state, props, list of used hooks and more.
+-   internal tree that has a "fiber" for each component instance and DOM element.
+
+-   Fibers are **NOT** re-created on every render
+    Fiber just mutates in the future reconciliation steps.
+    This is what make Fibers a perfect place to keep track of the current component state, props, list of used hooks and more.
 
 Each Fiber also contains a queue of work to do. Like updating state, updating ref, performing DOM update that's why Fiber is also defined as unit of work.
 
@@ -685,12 +686,13 @@ Fiber tree has a **structure** of a **linked list**.
 Here, each first child has link to it's parent and all the other children has link to it's previous sibling.
 It makes it easier to process the work associated with each Fiber.
 
-The work can be done **asynchronously** 
+The work can be done **asynchronously**
 Rendering process can be split into chunks, taks can be prioritized, and work can be **paused**, **resused**, or **thrown away**.
 
 This asynchronous rendering:
-- enables **concurrent feature** like Sspense or transitions
-- Long renders  **won't block** JS engine
+
+-   enables **concurrent feature** like Sspense or transitions
+-   Long renders **won't block** JS engine
 
 and this all is only possible because the render state doesn't produce any visible output to the DOM yet.
 
@@ -698,17 +700,15 @@ and this all is only possible because the render state doesn't produce any visib
 
 ![Alt text](images/image-13.png)
 
-
 Let's understand with the xample in photo.
 
 Initially the showModal = true, now when the state changes to false, it will: trigger re-render, which will then create a new virtual DOM.
 
 ![Alt text](images/image-16.png)
 
+Now, the new Vitual DOM needs to be Reconciled with the current Fiber Tree which will then result in updated Fiber Tree which internally is called **workInProgress Tree**
 
-Now, the new Vitual DOM needs to be Reconciled with the current Fiber Tree which will then result in updated Fiber Tree  which internally is called **workInProgress Tree**
-
-Whenever reconciliation needs to happen, Fiber wals the entire tree step-by-step and analyses exactly what needs to be changed between the current Fiber Tree and the  Updated Fiber Tree based on new Virtual DOM.
+Whenever reconciliation needs to happen, Fiber wals the entire tree step-by-step and analyses exactly what needs to be changed between the current Fiber Tree and the Updated Fiber Tree based on new Virtual DOM.
 
 This process of comparing elements step-by-step based on their position in the tree is called **Diffing**
 
@@ -726,18 +726,17 @@ Now, once this process is over, all these DOM mutations will be place in a list 
 
 It means till now React still not had written anything to DOM yet, but it has figured out what all changes needs to be made based on the list of effects.
 
-
-RENDER PHASE *gave* **LIST OF DOM UPDATES**
+RENDER PHASE _gave_ **LIST OF DOM UPDATES**
 
 ### Step 3: COMMIT Phase
 
 ![Alt text](images/image-18.png)
 
-- **React writes to the DOM:** insertions, deletions, and updates ( list of DOM updates are "flushed" to the DOM )
+-   **React writes to the DOM:** insertions, deletions, and updates ( list of DOM updates are "flushed" to the DOM )
 
-- **Committing is synchronous:** DOM is updates in one go, it can't be interrupted. This is necessary so that the DOM never shows partial results, ensureing a consistent UI.
+-   **Committing is synchronous:** DOM is updates in one go, it can't be interrupted. This is necessary so that the DOM never shows partial results, ensureing a consistent UI.
 
-- After the commit phase completes, the *workInProgress* fiber tree becomes the current tree **for the next render cycle**
+-   After the commit phase completes, the _workInProgress_ fiber tree becomes the current tree **for the next render cycle**
 
 **Writing to the DOM**, is the **wor**k of a separate library called **ReactDOM.**
 
@@ -747,64 +746,46 @@ Step 4: Browser Paints the updated DOM
 
 ![Alt text](images/image-19.png)
 
-
 ### How Diffing works ?
 
-Diffing uses 2 fundamental assumptions (rules) : 
-- Two elements of different types will **produce different trees**
-- Elements with a stable key prop stay the same across renders
+Diffing uses 2 fundamental assumptions (rules) :
 
->This allows React to go from 1,000,000,000 [O(n^3)]to 1000 [O(n)] operations per 1000 element
+-   Two elements of different types will **produce different trees**
+-   Elements with a stable key prop stay the same across renders
+
+> This allows React to go from 1,000,000,000 [O(n^3)]to 1000 [O(n)] operations per 1000 element
 
 1. Same Position, Different Element
 
 ![Alt text](images/image-20.png)
 
-- React assumes entire subtree is no longer valid.
-- Old components are destroyed and removed from DOM, including state.
-- Tree might be rebuilt if children stayed the same (state is reset)
+-   React assumes entire subtree is no longer valid.
+-   Old components are destroyed and removed from DOM, including state.
+-   Tree might be rebuilt if children stayed the same (state is reset)
 
 2. Same Position, Same Element
 
 ![Alt text](images/image-21.png)
 
-- Element will be kept (as well as child elements), including state.
-- New props/ attributes are passed if they changed between renders. **important**
-- Sometimes this is not what we want. Then we can use the key prop.
-
+-   Element will be kept (as well as child elements), including state.
+-   New props/ attributes are passed if they changed between renders. **important**
+-   Sometimes this is not what we want. Then we can use the key prop.
 
 ### Key Prop
 
-- Special prop which tells the diffing algorithm that an element is **unique.**
+-   Special prop which tells the diffing algorithm that an element is **unique.**
 
-- Allows React to **distinguish** between multiple instances of the same component type
+-   Allows React to **distinguish** between multiple instances of the same component type
 
-- When a key **stays the same across renders**, the element will be kept in the DOM (even if the position in the tree changes)
+-   When a key **stays the same across renders**, the element will be kept in the DOM (even if the position in the tree changes)
 
-  - keys in the list items
+    -   keys in the list items
 
-- When a key **changes between renders**, the element will be destroyed and a new one will be created ( even if the position in the tree is the same as before )
+-   When a key **changes between renders**, the element will be destroyed and a new one will be created ( even if the position in the tree is the same as before )
 
-  - Key prop to reset state ( changing key )
+    -   Key prop to reset state ( changing key )
 
 ![Alt text](images/image-22.png)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## Reconciliation vs Diffing
 
@@ -812,30 +793,27 @@ In React, reconciliation and "diffing" are terms often used in the context of th
 
 ### Reconciliation:
 
-**Definition:** 
+**Definition:**
 Reconciliation is the process of updating the actual DOM to match the virtual DOM efficiently. It involves comparing the new virtual DOM tree with the previous one and determining the minimum number of changes needed to update the actual DOM.
 
-**Purpose:** 
+**Purpose:**
 The goal of reconciliation is to optimize the rendering process by minimizing the number of updates to the DOM. React aims to make these updates as efficient as possible to improve performance.
 
 **Algorithm:**
- React uses a diffing algorithm during the reconciliation process to identify the differences between the new and old virtual DOM trees. The algorithm then generates a minimal set of instructions for updating the actual DOM.
-
+React uses a diffing algorithm during the reconciliation process to identify the differences between the new and old virtual DOM trees. The algorithm then generates a minimal set of instructions for updating the actual DOM.
 
 ### Diffing:
 
 **Definition:**
 Diffing, short for "difference algorithm," is the specific algorithm used during reconciliation to compare two virtual DOM trees and identify the changes between them.
 
-**Process:** 
+**Process:**
 The diffing process involves comparing nodes in the old and new virtual DOM trees and determining whether an update is needed. React's algorithm, often referred to as the "Virtual DOM Diffing Algorithm," is responsible for efficiently identifying the minimum set of changes required to update the DOM.
 
-**Efficiency:** 
+**Efficiency:**
 React's diffing algorithm is designed to be efficient, taking advantage of heuristics and optimizations to minimize the time and resources required for the reconciliation process.
 
 In summary, reconciliation is the broader process of updating the actual DOM based on changes in the virtual DOM, and diffing is the specific algorithm used within reconciliation to identify the differences between the old and new virtual DOM trees. React's diffing algorithm plays a crucial role in making this process efficient, helping to deliver optimal performance in updating the UI.
-
-
 
 ### How state updates are **BATCHED ?**
 
@@ -848,13 +826,12 @@ Let's say we are changing 3 states in our handler function, then it doesn't mean
 ![Alt text](images/image-25.png)
 
 React 18, provides automatic batching functionality.
- 
+
 Before React 18, automatic batching inside timeouts, promises and native event caller(el.addEventListener()) didn't happen. But this was overcome in React 18.
 
-- This state updating is asynchronous.
+-   This state updating is asynchronous.
 
-- We can **opt out** of automatic batching by wrapping a state update in ReactDOM.flushSync()
-
+-   We can **opt out** of automatic batching by wrapping a state update in ReactDOM.flushSync()
 
 ```
 function handler() {
@@ -878,25 +855,23 @@ function handler() {
 
 here, in the callback function we get the access to updated like value.
 
-
 ### Framework vs Library
-
 
 #### Framework
 
-- 👍 Everything we need to build a complete application is **included** in the framework
+-   👍 Everything we need to build a complete application is **included** in the framework
 
-- 👎 You are stuck with the frameworks tools and conventions (which is not always bad)
+-   👎 You are stuck with the frameworks tools and conventions (which is not always bad)
 
-- Vue, Angular
+-   Vue, Angular
 
 #### Library
 
-- 👍 You can **choose multiple 3rd party library** to build a complete application.
+-   👍 You can **choose multiple 3rd party library** to build a complete application.
 
-- 👎 You need to **research, download, learn and stay-up-to-date** with multiple external libraries.
+-   👎 You need to **research, download, learn and stay-up-to-date** with multiple external libraries.
 
-- React
+-   React
 
 #### React 3rd party library Ecosystem
 
@@ -904,7 +879,7 @@ here, in the callback function we get the access to updated like value.
 
 #### Frameworks built on top of React
 
-- NextJs, Remix, Gatsby
+-   NextJs, Remix, Gatsby
 
 ![Alt text](images/image-27.png)
 
@@ -922,16 +897,15 @@ here, in the callback function we get the access to updated like value.
 
 ![Alt text](images/image-31.png)
 
-
 #### Side effect:
-It is basically an *"interaction between a React component and the world outside the component".* We can also think of a side as *"Code that actually does something".* **Examples:** Data fetching, setting up subscriptions, setting up timers, manually accessing the DOM, etc.
+
+It is basically an _"interaction between a React component and the world outside the component"._ We can also think of a side as _"Code that actually does something"._ **Examples:** Data fetching, setting up subscriptions, setting up timers, manually accessing the DOM, etc.
 
 We need side effects all the time. They make our applications do something. **Not** in render logic!
 
-- Can be made in:
-  - Event handlers (onClick, onSubmit, etc)
-  - Effects (allows us to write code that will run at **different moments:** mount, re-render, or un-mount)
-
+-   Can be made in:
+    -   Event handlers (onClick, onSubmit, etc)
+    -   Effects (allows us to write code that will run at **different moments:** mount, re-render, or un-mount)
 
 ### useEffect hook
 
@@ -960,8 +934,8 @@ e.g., useEffect to make an api call after the component has rendered.
 
 ![Alt text](images/image-32.png)
 
-*Using async function in effect*
-effect function that we put inside useEffect() cannot return promise. 
+_Using async function in effect_
+effect function that we put inside useEffect() cannot return promise.
 So, we need to define another function inside the effect function, which will then return promise.
 
 ```
@@ -983,13 +957,13 @@ So, we need to define another function inside the effect function, which will th
 
 ### What's the useEffect Dependency array ?
 
-- By default, effects run **after every render**. we can prevent that by passing a dependency array.
+-   By default, effects run **after every render**. we can prevent that by passing a dependency array.
 
-- Without the dependency array, React doesn't know **when** to run the effect.
+-   Without the dependency array, React doesn't know **when** to run the effect.
 
-- **Each time one of the dependencies changes, the effect will be executed again**.
+-   **Each time one of the dependencies changes, the effect will be executed again**.
 
-- **Every state variable and prop used in the effect must be included in the dependency array**
+-   **Every state variable and prop used in the effect must be included in the dependency array**
 
 ![Alt text](images/image-33.png)
 
@@ -1001,110 +975,115 @@ So, we need to define another function inside the effect function, which will th
 
 ![Alt text](images/image-36.png)
 
-
 ### cleanup functions in useEfect
 
-- Function that we can **return from an effect**(optional)
+-   Function that we can **return from an effect**(optional)
 
-- Runs on two occasions:
-  - Before the effect is **executed again** in order to clear the results of previous side effect
-  - After a component has **unmounted**
+-   Runs on two occasions:
+    -   Before the effect is **executed again** in order to clear the results of previous side effect
+    -   After a component has **unmounted**
 
 cleanup function can be used in case like:
-when we are making http request in effect. 
-If the component re-renders while the first request is still running then a new second request will be fired off, which might create a bug called race condition. 
+when we are making http request in effect.
+If the component re-renders while the first request is still running then a new second request will be fired off, which might create a bug called race condition.
 
 Therfore its a good idea to cancel the request in a clean up function whenever the component re-renders or unmounts.
 
 ![Alt text](images/image-40.png)
 
-----------------------------------
+---
 
 ## React Hooks
 
-- Special built-in functions that allow us to **"hook" into React internals:**
-  - Creating and accessing state from Fiber tree
-  - Registering **side effects** in Fiber tree
-  - Manual **DOM Selection**
-  - Many more...
+-   Special built-in functions that allow us to **"hook" into React internals:**
 
-- Always start with **"use"** (useEffect, useState, etc.)
-- Enable easy **reusing of non visual logic:** we can compose multiple hooks into our own **custom hooks**
+    -   Creating and accessing state from Fiber tree
+    -   Registering **side effects** in Fiber tree
+    -   Manual **DOM Selection**
+    -   Many more...
 
-- Give **function components** the ability to own state and run side effects at different lifecycle points ( before v16.8 only available in class **components**)
+-   Always start with **"use"** (useEffect, useState, etc.)
+-   Enable easy **reusing of non visual logic:** we can compose multiple hooks into our own **custom hooks**
+
+-   Give **function components** the ability to own state and run side effects at different lifecycle points ( before v16.8 only available in class **components**)
 
 Some built-in hooks:
-- useState
-- useEffect
-- useReducer
-- useContext
-- useRef
-- useCallback
-- useMemo
-- useTransition
-- useDeferredValue
+
+-   useState
+-   useEffect
+-   useReducer
+-   useContext
+-   useRef
+-   useCallback
+-   useMemo
+-   useTransition
+-   useDeferredValue
 
 ### Rules of hooks:
+
 1. **Only call hooks at the top level**
-  - D **NOT** call hooks inside **conditionals, loops, nested functions,** or after an **early return**
-  - This is necessary to ensure that hooks are always called in the **same order**
+
+-   D **NOT** call hooks inside **conditionals, loops, nested functions,** or after an **early return**
+-   This is necessary to ensure that hooks are always called in the **same order**
 
 2. **Only call hooks from React functions**
-  - Only call hooks inside a **function component** or a **custom hook**
 
-*Note: These rules are **automatically enforced by** React's ESLint rules*
+-   Only call hooks inside a **function component** or a **custom hook**
+
+_Note: These rules are **automatically enforced by** React's ESLint rules_
 
 ![Alt text](images/image-37.png)
 
-
 #### There are two ways to initialize state in useState hook
 
-- const [name, setName] = useState(0) -> passing the value in the hook
-- passing function inside the hook 
-  - it's done when the state needs value based on some computation
-  const [name, setName] = useState(function() {
-    return localStorage.getItem('name');
-  })
-
+-   const [name, setName] = useState(0) -> passing the value in the hook
+-   passing function inside the hook
+    -   it's done when the state needs value based on some computation
+        const [name, setName] = useState(function() {
+        return localStorage.getItem('name');
+        })
 
 ### useRef hook
 
-- It let's you reference a value that's not needed for rendering
-- It's basically an object which has **mutable** property that is **persisted across renders**
+-   It let's you reference a value that's not needed for rendering
+-   It's basically an object which has **mutable** property that is **persisted across renders**
 
-- Two big use cases:
-  1. **Creating a variable thats stays the same between renders**(***e.g.previous state, setTimeout, etc.***)
-  2. **Selecting and storing the DOM element**
+-   Two big use cases:
 
-- Refs are for **data that is NOT rendered:** usually only appear in event handlers or effects, not in JSX (otherwise use state)
+    1. **Creating a variable thats stays the same between renders**(**_e.g.previous state, setTimeout, etc._**)
+    2. **Selecting and storing the DOM element**
 
-- Do **NOT** read write in render logic(like state)
+-   Refs are for **data that is NOT rendered:** usually only appear in event handlers or effects, not in JSX (otherwise use state)
 
-- Calue of ref is accessed using `.current`
+-   Do **NOT** read write in render logic(like state)
+
+-   Calue of ref is accessed using `.current`
 
 ![Alt text](images/image-38.png)
 
 #### Similarities between Refs and State
 
-- Both persists the data across renders
+-   Both persists the data across renders
 
 #### Difference between Refs and State
 
-- Re-renders
-  - State: updating state causes re-render
-  - Ref: updating ref do not causes re-render
+-   Re-renders
 
-- Mutablity
-  - State: immutable
-  - Refs: mutable
+    -   State: updating state causes re-render
+    -   Ref: updating ref do not causes re-render
 
-- Asynchronous
-  - State: updates are asynchronous, so we cannot use new state just after the update
-  - Refs: update is synchronous, so we can use the new ref just after the update
+-   Mutablity
+
+    -   State: immutable
+    -   Refs: mutable
+
+-   Asynchronous
+    -   State: updates are asynchronous, so we cannot use new state just after the update
+    -   Refs: update is synchronous, so we can use the new ref just after the update
 
 Examples:
 
-1. *Using ref to count number of re-renders*
+1. _Using ref to count number of re-renders_
 
     If we tried to count how many times our application renders using the useState Hook, we would be caught in an infinite loop since this Hook itself causes a re-render.
 
@@ -1117,7 +1096,7 @@ Examples:
       });
     ```
 
-2. *Using ref to focus an input element*
+2. _Using ref to focus an input element_
 
     ```
     function Search() {
@@ -1128,35 +1107,35 @@ Examples:
       }, []);
 
       return <input className="search"
-              ref={inputEl}> 
+              ref={inputEl}>
     }
     ```
 
 ### Custom Hooks
 
-- A resuable function which uses one or more react hooks
-- Allows us to reuse **non-visual logic** in multiple components
-- One custom hook should have **one purpose**, to make it **resuable** and **portable** (even across multiple projects)
-- Function name needs to start with `use`
+-   A resuable function which uses one or more react hooks
+-   Allows us to reuse **non-visual logic** in multiple components
+-   One custom hook should have **one purpose**, to make it **resuable** and **portable** (even across multiple projects)
+-   Function name needs to start with `use`
 
-- Unlike components, can receive and return **any relevant data**
+-   Unlike components, can receive and return **any relevant data**
 
-  ![Alt text](images/image-39.png)
-
-
+    ![Alt text](images/image-39.png)
 
 ## useReducer Hook
+
 ```
 const [count, dispatch] = useReducer(reducer, 0);
 ```
 
-- it takes two values: 
-  1. a reducer function
-  2. initial state (here 0)
+-   it takes two values:
+    1. a reducer function
+    2. initial state (here 0)
 
 reducer(): this function takes two arguments **state** and **action**
-  - state is the initial state
-  - action is the value which we will use to modify the state
+
+-   state is the initial state
+-   action is the value which we will use to modify the state
 
 ```
 function reducer(state, action) {
@@ -1191,20 +1170,20 @@ State Management With useState is not enough in certain situations:
 
 ![Alt text](images/image-41.png)
 
-- An alternative way of setting state, ideal for **complex state** and **related pieces of state**
+-   An alternative way of setting state, ideal for **complex state** and **related pieces of state**
 
-- Stores related pieces of state in a **state** object
+-   Stores related pieces of state in a **state** object
 
-- useReducer needs **reducer:** function containing **all logic to update state. *Decouples state logic from component***
+-   useReducer needs **reducer:** function containing **all logic to update state. _Decouples state logic from component_**
 
-- **reducer:** pure function (**no side effects**) that takes current state and action, **and returns the next state**
+-   **reducer:** pure function (**no side effects**) that takes current state and action, **and returns the next state**
 
-- **action:** object that describes **how to update state** (contains *type* and *payload* type: shows what type of state update , 
-payload: is the value to be used to update state
-**type and payload are standard naming convention, but can be named anything**
-)
+-   **action:** object that describes **how to update state** (contains _type_ and _payload_ type: shows what type of state update ,
+    payload: is the value to be used to update state
+    **type and payload are standard naming convention, but can be named anything**
+    )
 
-- **dispatch:** function to trigger state updates, by **"sending" actions** from **event handlers** to the **reducer**
+-   **dispatch:** function to trigger state updates, by **"sending" actions** from **event handlers** to the **reducer**
 
 ### Analogy to understand useReducer
 
@@ -1215,49 +1194,48 @@ payload: is the value to be used to update state
 ### Setting up react project using vite
 
 1. Create project
-   - `npm create vite@latest`
+    - `npm create vite@latest`
 2. Setup eslint
-   - Vite doesn't configure eslint for us. We have to do it manually.
-   - `npm install eslint vite-plugin-eslint eslint-config-react-app --save-dev`
+    - Vite doesn't configure eslint for us. We have to do it manually.
+    - `npm install eslint vite-plugin-eslint eslint-config-react-app --save-dev`
 3. Create file .eslintrc.json and add some rules
-   - `{
-        "extends": "react-app"
-     }`
-     This will make eslint to use rules predefines in the package we installed
+    - `{
+   "extends": "react-app"
+}`
+      This will make eslint to use rules predefines in the package we installed
 4. Configure vite.config.js file
+
     - Add eslint plugin to the plugins array
 
-      `import eslint from 'vite-plugin-eslint`
+        `import eslint from 'vite-plugin-eslint`
 
-      `plugins: [react(), eslint()]`
+        `plugins: [react(), eslint()]`
 
 ---
 
 ### Routing
 
-- With routing, we match **different urls** to **different UI views** (React components): **routes**
+-   With routing, we match **different urls** to **different UI views** (React components): **routes**
 
-- This enables users to **navigate between different applications screens**, using the browser url
+-   This enables users to **navigate between different applications screens**, using the browser url
 
-- Keeps the UI **in sync** with the current browser URL
+-   Keeps the UI **in sync** with the current browser URL
 
-- Allows us to build **single page applications(SPA)**
+-   Allows us to build **single page applications(SPA)**
 
-> **ReactRouter -> 3rd party library used for Routing**
-> `npm i react-router-dom`
+> **ReactRouter -> 3rd party library used for Routing** > `npm i react-router-dom`
 
 ---
 
 ### <u>Single-Page Applications (SPA)</u>
 
-- Application that is **executed entirely on the client (browsers)**
+-   Application that is **executed entirely on the client (browsers)**
 
-- **Routes:** different URLs correspond to different views (components)
+-   **Routes:** different URLs correspond to different views (components)
 
-- **Javascript** is used to update the page (DOM)
-- **The page is never reloaded** as based on url a componet is rendered.
-- This functionality gives a feel of a **native app**
-
+-   **Javascript** is used to update the page (DOM)
+-   **The page is never reloaded** as based on url a componet is rendered.
+-   This functionality gives a feel of a **native app**
 
 #### <u>SPA Running on client</u>
 
@@ -1266,6 +1244,7 @@ payload: is the value to be used to update state
 3. DOM is updated: React component corresponding to the new URL is rendered.
 
 ---
+
 Adding Router to the Application
 
 ```
@@ -1288,24 +1267,25 @@ function App() {
 }
 
 ```
-*Here, h1 tag will be on every page. And the element whose route matches the url will be rendered.*
+
+_Here, h1 tag will be on every page. And the element whose route matches the url will be rendered._
 
 #### Linking between Routes with `<Link />` and `<NavLink />`
 
-- If we use 'a' tag, to siwtch to different routes, then whole page refreshes which is not what we want.
+-   If we use 'a' tag, to siwtch to different routes, then whole page refreshes which is not what we want.
 
-- `<Link to = "/home"> Home </Link>` this will render the home component without refreshing the page. It just updates the dom.
+-   `<Link to = "/home"> Home </Link>` this will render the home component without refreshing the page. It just updates the dom.
 
-- `<NavLink to = "/home"> Home </NavLink>` with NavLink, it gets extra class "active" when it is selected, and then we can style the active link based on it. 
-
+-   `<NavLink to = "/home"> Home </NavLink>` with NavLink, it gets extra class "active" when it is selected, and then we can style the active link based on it.
 
 #### Using CSS modules
 
-- We use this to have different css files for every component
+-   We use this to have different css files for every component
 
-- use extesnion `.module.css` for naming the css file. e.g., `NavBar.module.css`
+-   use extesnion `.module.css` for naming the css file. e.g., `NavBar.module.css`
 
 <u>NavBar.module.css</u>
+
 ```
 .nav {
   display: flex;
@@ -1315,7 +1295,8 @@ function App() {
 
 Using above css in a component:
 
-<u>NavBar.jsx</u>
+**<u>NavBar.jsx</u>**
+
 ```
 import styles from "NavBar.module.css
 
@@ -1331,49 +1312,47 @@ When we inspect the page, then we will find out that our nav tag don't has the c
 
 This is done so that, if we use nav class in some other component then it don't clashes. Makit every class unique.
 
-***To add a global style from inside module.css***
+**_To add a global style from inside module.css_**
 
 Let's say we want a class in a module to be accessible everywhere.
 
 To do that:
 
-- We have to use :global because, when we write just `.test` then css module will add random string to it. To avoid this we need to follow the above approach.
+-   We have to use :global because, when we write just `.test` then css module will add random string to it. To avoid this we need to follow the above approach.
 
-
-- We are required to do above thing in cases when we get classes from external sources. For example, when we use <NavLink /> then it gives us 'active' class which we can use to style the currently active link. So we can use global function to select .active.
+-   We are required to do above thing in cases when we get classes from external sources. For example, when we use <NavLink /> then it gives us 'active' class which we can use to style the currently active link. So we can use global function to select .active.
 
 ### Storing state in url using params and quesry string
 
-- **useParams() hook**
+-   **useParams() hook**
 
-  We can pass parameter from one page to other via routes.
+    We can pass parameter from one page to other via routes.
 
-  This parameter/data can be used in other page to show some important stuffs.
+    This parameter/data can be used in other page to show some important stuffs.
 
-  like:
-  `<Route path="/project/:title" element={<Project />}>`
+    like:
+    `<Route path="/project/:title" element={<Project />}>`
 
-  In the above route, we are going to /project but we also have option to give aparameter `title`. Based on this title, in the <Project /> that particular data will be shown which matches it.
+    In the above route, we are going to /project but we also have option to give aparameter `title`. Based on this title, in the <Project /> that particular data will be shown which matches it.
 
-  and in <Project /> component we can access that params using `useParams()` hook.
+    and in <Project /> component we can access that params using `useParams()` hook.
 
-  ```
-  const data = useParams();
-  output: {'title': something}
-  ```
+    ```
+    const data = useParams();
+    output: {'title': something}
+    ```
 
-- useSearchParams() : for getting query string from url
+-   useSearchParams() : for getting query string from url
 
-  `/projects?type=frontend&status=complete`
+    `/projects?type=frontend&status=complete`
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const type = searchParams.get("type");
-  const status = searchParams.get("status");
+    const [searchParams, setSearchParams] = useSearchParams();
+    const type = searchParams.get("type");
+    const status = searchParams.get("status");
 
-  we can change the wuery params using `setSeacrhParams`
+    we can change the wuery params using `setSeacrhParams`
 
-  setSearchPArams({status: "incomplete"})
-
+    setSearchPArams({status: "incomplete"})
 
 #### useNavigate()
 
@@ -1395,10 +1374,134 @@ useNavigate(-1) will take one step back i.e, previous page
 #### Navigate
 
 Navigate is basically useNavigate() converted into a React component. This makes it easy to implement in our React apps.
+
 ```
+Javascript
 <Route path="/auth" exact element={() => (!user ? <Auth /> : <Navigate to="/posts" />)} />
 </Routes>
 ```
 
 Here, the Navigate component redirects the user to posts section on getting rendered.
 This happend IF the user is logged in(user object is present).
+
+---
+
+### Context Api
+
+-   System to pass data throughout the app **without manuklly passing props** down the tree
+
+-   Allows us to **boroadcast global state** to the entire app
+
+Three parts of Context Api:
+
+1.  **Provider:** gives all child components access to a value
+2.  **Value:** data that we want to make available (usually state and functions)
+3.  **Consumers:** all components that read the provided context value
+
+When a value is updated, then the provder will notify the consumers of the value change and the consumers (i.e, all the components that uses the value) will get re-rendered.
+
+
+```
+
+function App() {
+  return (
+    <header>
+      <Blog post={post}/>
+      <Search onClear={handleClear}/>
+    </header>
+  )
+}
+
+function Blog({post}) {
+  return (
+    <header>
+      <BlogDetail post={post}/>
+    </header>
+  )
+}
+
+function BlogDetail({post}) {
+
+  return <p>{post}</p>
+}
+
+function Seacrh({onClear}) {
+
+  return <button onClick={onClear}>Clear</button>
+}
+
+```
+
+In the example above , we can see how much prop drilling we have to do. `Post` data need to passs through multiple component to reach `BlogDetail` component and same is true for `onClear`
+
+So, we can create context for `Post` and `onClear`
+
+```
+import {createContext} = useContext();
+
+const PostContext = createContext();
+
+function App() {
+
+  return (
+    <PostContext.Provider value={{
+      post: post,
+      onClear: handleClear
+    }}>
+      <header>
+        <Blog />
+        <Search />
+      </header>
+    </PostContext.Provider>
+  )
+}
+
+function Blog({post}) {
+  return (
+    <header>
+      <BlogDetail post={post}/>
+    </header>
+  )
+}
+
+function BlogDetail() {
+  // accessing the post data
+
+  const {post} = useContext(PostContext);
+  return <p>{post}</p>
+}
+
+function Seacrh() {
+  const {onClear} = useContext(PostContext);
+  return <button onClick={onClear}>Clear</button>
+}
+
+```
+ 
+***useContext(ContextThatYouCreated) is used to access the context value***
+
+
+## Types of STATE
+
+Based on Accessibility
+
+1.  **Local state**
+    - Needed only by **one or few components**
+    - Only accesible in **component and child components**
+
+2.  **Global State**
+    - Might be needed by **many components**
+    - Accessible to **every component** in the application
+
+Based on Domain
+
+1.  **Remote State**
+    - All application data **loaded from a remote server** (API)
+    - Usually **asynchronous**
+    - Needs re-fetching + updating
+    - 3rd party tools: Reducx, Zustand, Recoil e.t.c for globally maintaing state
+
+2.  **UI State**
+    - **Everything else**
+    - Theme, list filters, form data, etc.
+    - Usually **synchronous** and stored in the application.
