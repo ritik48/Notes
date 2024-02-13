@@ -1198,11 +1198,10 @@ State Management With useState is not enough in certain situations:
 2. Setup eslint
     - Vite doesn't configure eslint for us. We have to do it manually.
     - `npm install eslint vite-plugin-eslint eslint-config-react-app --save-dev`
-3. Create file .eslintrc.json and add some rules
-    - `{
+3. Create file .eslintrc.json and add some rules - `{
    "extends": "react-app"
 }`
-      This will make eslint to use rules predefines in the package we installed
+   This will make eslint to use rules predefines in the package we installed
 4. Configure vite.config.js file
 
     - Add eslint plugin to the plugins array
@@ -1400,7 +1399,6 @@ Three parts of Context Api:
 
 When a value is updated, then the provder will notify the consumers of the value change and the consumers (i.e, all the components that uses the value) will get re-rendered.
 
-
 ```
 
 function App() {
@@ -1473,35 +1471,71 @@ function BlogDetail() {
 
 function Seacrh() {
   const {onClear} = useContext(PostContext);
+
+  the value of `useContext(PostContext) can be undefined, when it's accessed from the component which is not the child of the provider.
+
   return <button onClick={onClear}>Clear</button>
 }
 
 ```
- 
-***useContext(ContextThatYouCreated) is used to access the context value***
 
+**_useContext(ContextThatYouCreated) is used to access the context value_**
 
 ## Types of STATE
 
 Based on Accessibility
 
 1.  **Local state**
-    - Needed only by **one or few components**
-    - Only accesible in **component and child components**
+
+    -   Needed only by **one or few components**
+    -   Only accesible in **component and child components**
 
 2.  **Global State**
-    - Might be needed by **many components**
-    - Accessible to **every component** in the application
+    -   Might be needed by **many components**
+    -   Accessible to **every component** in the application
 
 Based on Domain
 
 1.  **Remote State**
-    - All application data **loaded from a remote server** (API)
-    - Usually **asynchronous**
-    - Needs re-fetching + updating
-    - 3rd party tools: Reducx, Zustand, Recoil e.t.c for globally maintaing state
+
+    -   All application data **loaded from a remote server** (API)
+    -   Usually **asynchronous**
+    -   Needs re-fetching + updating
+    -   3rd party tools: Reducx, Zustand, Recoil e.t.c for globally maintaing state
 
 2.  **UI State**
-    - **Everything else**
-    - Theme, list filters, form data, etc.
-    - Usually **synchronous** and stored in the application.
+    -   **Everything else**
+    -   Theme, list filters, form data, etc.
+    -   Usually **synchronous** and stored in the application.
+
+---
+
+## Performance Optimization Tools
+
+Can be done by the following:
+
+1.  **Prevent Wasted Renders**
+    - memo
+    - useMemo
+    - useCallback
+    - Passing elements as children or regular prop
+
+2.  **Improve App Speed/Responsiveness**
+    - useMemo
+    - useCallback
+    - useTransition
+
+3.  **Reduce Bundle Size**
+    - Using fewer 3rd-party packages
+    - Code splitting and lazy loading
+
+
+## Prevent Wasted Renders
+
+- Renders happens because of the following reasons:
+  1. State changes
+  2. Context changes (the componenets which are subscribed to that context will get re-rendered)
+  3. When parent component re-renders, it causes the child component to re-render as well
+
+- A render that didn't produce any change in the DOM is termed a **wasted render**.
+
