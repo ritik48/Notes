@@ -1529,13 +1529,333 @@ Can be done by the following:
     - Using fewer 3rd-party packages
     - Code splitting and lazy loading
 
-
+ 
 ## Prevent Wasted Renders
 
 - Renders happens because of the following reasons:
   1. State changes
-  2. Context changes (the componenets which are subscribed to that context will get re-rendered)
+  2. Context changes (the componenets which are subscribed to that context provider will get re-rendered,  when context changes)
   3. When parent component re-renders, it causes the child component to re-render as well
+
+  Updating props doesn't re-render the component. But we have seen that when props changes then the component re-renders. It's actuualy because the parent has re-rendered which caused the child components to re-render.
 
 - A render that didn't produce any change in the DOM is termed a **wasted render**.
 
+
+### Optimizing render using children props
+
+Consider the following example:
+
+```
+
+function Test() {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+    
+      <button onClick={() => setCount(count + 1)}>Increase {count}</button>
+      <SlowComponent />
+    </div>
+  )
+}
+
+```
+
+In the above code, Test component has a button which increases the count, and there is a also a SlowComponent, which we can assume displays a lot of data and therefore is slow. 
+
+Now, when we click the button, then count changes which cause the Test component to re-render, and due to this SlowComponent also gets re-rendered.
+Now it will slow down the application when button is clicked frequently. And also, if we see carefully then SlowComponent technically don't need to re-render as it's not dependent on the count state.
+
+So, to avoid this, we should use the SlowComponent inside Test as a children i.e, Test will accept the SlowComponent as the children prop. Now since SlowComponent is passed as children, it has already been created before, and therefore state change in the Test component won't cause the SlowComponent to ren-render.
+
+Modified Code:
+
+```
+
+function Test({children}) {
+  const [conunt, setCount] = useState(0);
+  return (
+    <div>
+    
+      <button onClick(() => setCount(count + 1))>Increase {count}</button>
+      { children }
+    </div>
+  )
+}
+
+function App() {
+  return <>
+    <Test>
+      <SlowComponent />
+    </Test>
+  </>
+}
+
+```
+
+### What is Memoization ?
+
+**Memoization:** Optimization technique that executes a pure function once, and saves the result in memory. If we try to execute the function again with the **same argument as before,** the previously saved result will be returned, **without executing the function again**
+
+In react we can:
+
+- Memoize **components** with memo
+- Memoize **objects** with useMemo
+- Memoize **functions** with useCallback
+
+---
+
+### memo
+
+![alt text](images/image-44.png)
+
+- Used to create a component that will **not re-render when its paremt re-renders,** as long as the props stay the same between the renders.
+
+- **Only affects props!** A memoized component will still re-render when its **own state changes** or when a **context that it's suscribed to changes**
+
+- Only makes sense when the component is **heavy**(slow rendering), **re-renders often**, and does so **with the same props**
+
+To memoize a function, we use `memo` from react
+
+```
+import memo from 'react';
+
+function SlowComponent = memo(function ({show}) {
+
+  if(show) {
+    return <div className>...</div>
+  } else {
+    return <div>hidden</div>
+  }
+})
+
+function App() {
+  return <>
+      <div> Hello World </div>
+      <SlowComponent slow={true} />
+    </>
+}
+
+```
+
+
+
+Since, we wrapped the SlowComponent with `memo`, it will render just once and will remain same even if parent re-render until there is no change in the prop.
+
+**An issue with memo**
+
+But, there will be an issue, if prop was passed as an object.
+Consider this code:
+
+```
+import memo from 'react';
+
+function SlowComponent = memo(function ({option}) {
+
+  if(option.show) {
+    return <div className>...</div>
+  } else {
+    return <div>hidden</div>
+  }
+})
+
+function App() {
+  const option = {show: true};
+  return <>
+      <div> Hello World </div>
+      <SlowComponent option={option} />
+    </>
+}
+
+```
+
+In the above, code since the prop is passed as an object, so when the parent re-renders, it will also cause SlowComponnt to re-render as well.
+
+It's because:
+
+- In React, everything is **re-created on every render**(including objects and functions)
+
+- In JavaScript, two objects or functions that look same, **are actully different** `({} != {})`
+
+Therefore
+
+- If objects or functions are passed as props, the child component will always see them as **new props on each re-render**
+
+**If props are different between re-renders, *memo will not work***
+
+*SOLUTION:* 
+
+**We need to memoize objects and functions, to make them stable (preserve) between re-renders `(memoized {} == memoized {})`**
+
+For this react gives use twoo hooks:
+
+### useMemo AND useCallback
+
+- Used to memoize values **(useMemo)** and functions **(useCallback) between renders**
+
+- Values passed into useMemo and useCallback will be stored in memory ("Cached") and **returned in subsequent re-renders, as long as dependencies ("inputs") stay the same**
+
+- useMemo and and useCallback have a **dependency array** (like useEffect): whenever one **dependency changes**, the values will be re-created.
+
+*Three Big Use Case:*
+1. **Memoizing props to prevent wasted renders (together with memo)**
+
+2. **Memoizing values to avoid expensive re-calculations on every render**
+
+3. **Memoizing values that are used in dependency array of another hook.** For example: to avoid infinite useEffect loops
+
+
+memoizing the object `option`
+
+```
+const option = useMemo(() => {
+  return {
+    show: true
+  }
+}, []);
+
+```
+*useMemo takes callback function, which will be called on the initial render.*
+
+Here, since the dependency array is empty, so it will just caches the value ain the intial render.
+**But**, if the object uses any stae variable, then we will have to pass that in the dependency array, so that whenever that state changes, it will make the useMemo to re-calculate the value and cache it agin.
+
+
+### useCallback
+
+- to memoize functions
+
+```
+
+import useCallback from 'react';
+
+function App() {
+
+  const handAddPost = useCallback(function () {
+    ...
+  })
+}
+```
+
+here, we are not calling the function, instead memoizing the function itself. while in useMemo, we were memoizing the result, which came from the callback function.
+
+**Note:**
+We don't need to memoize the state setter functions. React guarantees that the seeter function of useState hook will always have unique identity. Whihc means they will not change on re-renders, therefore we can ommit them from the dependency arrays of all the hooks.
+
+### Optimizing Bundle Size with Code Splitting
+
+**Bundle:** JavaScript file containing the **entire application code.** Downloading the bundle will load **the entire app at once**, turning it into a SPA , that is running entirely on the client
+
+**Bundle Size:** Amount of JavaScript users have to download to start using app. One f the most important things t optimize, so that the bundle takes **less time to download**.
+
+**Code splitting:** Splitting bundle into multiple parts that can be **downloaded over time** ("lazy loading") 
+
+
+Here, we can lazy load every page that we have in a component. That is only when a page is accessed that, the code will be loaded. It's done using `lazy` function from  `react`.
+
+lazy : it takes a callback, which calls the dynamic import function provided by javascript.
+
+```
+import {lazy} from 'react';
+
+const HomePage = lazy(() => import('./pages/Homeage'));
+const About = lazy(() => import('./pages/About'));
+const Project = lazy(() => import('./pages/Project'));
+
+```
+
+We can use Suspense api in React to show a fallback, i.e, something laike loading page, while the component is being lazily loaded. 
+For example: if we access Homepage for the first time then it will be dynamically loaded and while that's done we can show a fallback, like a loading spinner.
+
+```
+import {Suspense} from "react"; 
+
+function App() {
+  return <BrowserRouter>
+            <Suspense fallback={<Spinner />}>
+              <Routes /> ....
+              <Routes />...
+            </Suspense>
+          </BrowserRouter>
+  }
+
+```
+
+---
+
+### UseEffect Dependency Array RULES
+
+- Every **state variable, prop,** and **context value** used inside the effect **MUST** be included in the dependency array.
+
+- **All "reactive values" must be included!** That means any **functions** or **variables** that reference **any other** reactive value
+  - **Reactive value:** state, prop, or context value, or any other value that refrences a reactive value.
+
+- Do **Not** use **objects** or **arays** as dependencies (objects are recreated on each render, and React sees new objects as **different**, {} !== {})
+
+*Note:* Same rules apply to the dependency arrays of other hooks: useMemo and useCallback
+
+### Removing unnecessary Dependencies
+
+**Removing Function Dependencies**
+
+- Move function **into the effect**
+
+- If you need the function in multiple places, **memoize it** (useCallback)
+
+- If the function doesn't reference any reactive values, move it **out of the component**
+
+**Removing Object Dependencies**
+
+- Instead of including the entire object, include **only the properties you need** (primitive values)
+
+- If that doesn't work, use the same strategies as for functions (**moving** or **memoizing** object)
+
+**Other Strategies**
+
+- If you have **mutiple related values** as dependencies, try using a **reducer** (useReducer)
+
+- You don't need to include `setState` (from useState) and `dispatch` (from useReducer) in the dependencies, as **React guarantees them to be stable** across renders.
+
+### When not to use as effect ?
+
+Effect should be used as a **last resort**, when no other solutions make sense. React calls them as "escape hatch" to step outside of React
+
+**Three cases where effects are overused:**
+
+1. **Responding to a user event:** An event handler function should be used instead
+
+2. **Fetching data on component mount:** This is fine in simple apps, but in real-world app, a library like React Query should be used
+
+3. **Synchronizing state changes with one another:** (setting state based on another state variable). Try to use derived state and event handlers.
+
+---
+
+## What is Redux ?
+
+- 3rd-party library to manage **global state**
+
+- **Standalone** library, but easy to integrate with React apps using react-redux library
+
+- All global state is stored in one **globally accessible store,** which is easy to update using **"actions"** (like useReducer)
+
+- It's conceptually similar to using the Context API + useReducer
+
+- Two "versions": 
+**(1):** Classic Redux
+**(2):** Modern Redux Toolkit
+
+
+### The mechanism of Redux
+
+- Action creater function is called to create an action (it's not a feture of react, it's just a convention)
+  - To automate writing action. Helpful to keep all possible actions in one central place.
+
+- This action contains how the state will be updated, and is dispatched to **Redux Store**
+
+- All global state lives in this centralized contaner. It's the **single source of truth** of global state in the app.
+
+- The store has one or more reducers, each responsible for handling single task. Like one for user data, other for product search, e.t.c
+
+- Each reducer is a pure function that calculates the next state (state transition) based on the **action** and the **current state**. Usually one reducer per **app feature** (r.g. shopping cart + user data + theme)
+
+![alt text](images/image-43.png)
