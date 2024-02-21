@@ -1859,3 +1859,171 @@ Effect should be used as a **last resort**, when no other solutions make sense. 
 - Each reducer is a pure function that calculates the next state (state transition) based on the **action** and the **current state**. Usually one reducer per **app feature** (r.g. shopping cart + user data + theme)
 
 ![alt text](images/image-43.png)
+
+
+---
+
+### *Let's manage Account state using Classic Redux*
+
+1.  First create the initial state
+    ```
+    const initialStateAccount = {
+      balance: 0,
+      loan: 0,
+      purpose: ''
+    }
+    ```
+2.  Create a reducer function (just like we did in useReducer hook)
+    ```
+    function accountReducer(state = initialStateAccount, action) {
+      switch (action.type) {
+          case "account/withdraw":
+              if (action.payload > state.balance) return state;
+              return {
+                  ...state,
+                  balance: state.balance - action.payload,
+              };
+          case "account/deposit":
+              return {
+                  ...state,
+                  balance: state.balance + action.payload,
+              };
+          case "account/applyLoan":
+              if (state.loan > 0) return state;
+              return {
+                  ...state,
+                  balance: state.balance + action.payload.amount,
+                  purpose: action.payload.purpose,
+                  loan: action.payload.amount,
+              };
+          case "account/payLoan":
+              return {
+                  ...state,
+                  balance: state.balance - state.loan,
+                  loan: 0,
+                  purpose: "",
+              };
+          default:
+              return state;
+        }
+    }
+    ```
+
+3.  Create s reduc store which will take the reducer function
+
+    ```
+    import {createStore} from 'redux';
+
+    const store = createStore(accountReducer);
+    ```
+
+3.  To access the state and change the state `store` will be used
+
+    a.  Accessing the state
+
+        const val = store.getState()
+        console.log(val) // {balance: ..., loan: ..., purpose: ...}
+        
+    b.  Setting the state
+        To set a sttae, we call `dispatcher` function given by `store` and pass `action` to it
+
+        store.dipsatch({type: 'account/deposit', payload: 500})
+
+4.  We can create Action Creator to avoid manually writing `account/deposit` , it's not mandatory but is convention
+    ```
+    function deposit(amount) {
+      return {type: 'account/deposit', payload: amount}
+    }
+
+    store.dispatch(deposit(500))
+    ```
+
+5.  If we have multiple reducers, then we use `combineReducers` function to create a `rootReducer`
+    ```
+    import {combineReducers} from 'redux'
+
+    const rootReducer = combineReducers({
+      account: accountReducer,
+      user: userReducer
+    })
+
+    const store = createStore(rootReducer)
+    ```
+
+***Structuring the redux store in project***
+
+There can be multiple reducers, each responsible for some individual feature.
+So, convention is to create  features, folder, and it will have another folder like account, which will contain account related information, and the reducer, initial state, action creater of accunt will be put in `accountSlice.js` file, it's named so, as it's just a slice/part of whole larger state.
+
+#### <u>To connect Redux store with React app</u>
+
+we need another package `react-redux`
+It's somewhat like Context Api , where we have provider and other hooks to get context value
+
+```
+import { Provider } from 'react-redux'
+
+function App() {
+  return <Provider store={store}>
+            <Home />
+        </Provider>
+
+  }
+
+```
+
+1.  Getting store values in React App
+
+    **To get store values we use `useSelector` from `react-redux`**
+
+    **useSelectore:** takes a callback function with `store` as a single argument
+
+    ```
+    import {useSelector} from 'react-redux'
+
+    function Home() {
+
+      const name = useSelectore((store) => store.user.name);
+
+    }
+    ```
+
+2.  Changing store state from React App
+
+    **We use `useDispatch` from `react-redux`**
+
+    ```
+      function handleDeposit() {
+        const dispatch = useDispatch();
+
+        dispatch({type: 'account/deposit', payload: 500});
+        
+        or pass action creator to it
+
+        dispatch(deposit(500));
+      }
+    ```
+
+### <u>Redux Middlewares</u>
+
+Redux middleware is the function that sits between dispatching the action, and the store. Allows us to run code after dispatching but before reaching reducer in the state.
+
+It is the place where, asynchronous api calls or any async operation is performed.
+
+Even though we could make async calls in the component and then dispatch the data to store, still's it's not ideal to fetch data in components.
+And in store, 
+- We should not make any api calls or async operations *as*
+- Reducers needs to be pure functions
+
+Therefore wee need something like Redux Middleware.
+- It's perfect for asynchronous code
+- API calls, timers, logging e.t.c
+- Place for side effects
+
+### Redux Thunk
+
+Most popular middleware in Redux, to perform asynchronous operations.
+
+so, the `action` goes to `Thunk Middleware`, and all the async operations are done there and data is put in the payload of `action`. It is then dispatched to Redux store.
+
+
