@@ -272,7 +272,8 @@ State is internal data that can be updated by the component's logic
 -   Statements are **not allowed** (if/else, for, switch)
 
 -   JSX produces a **JavaScript expression**
-    const el = <h1>Hello React !!!</h1>
+
+    `const el = <h1>Hello React !!!</h1>`
 
     _converts to_
 
