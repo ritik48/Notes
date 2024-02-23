@@ -2020,10 +2020,74 @@ Therefore wee need something like Redux Middleware.
 - API calls, timers, logging e.t.c
 - Place for side effects
 
-### Redux Thunk
+### <u>Redux Thunk</u>
+
+`npm install -redux-thunk`
 
 Most popular middleware in Redux, to perform asynchronous operations.
 
 so, the `action` goes to `Thunk Middleware`, and all the async operations are done there and data is put in the payload of `action`. It is then dispatched to Redux store.
 
+<u>**Must Read:**</u> 
 
+>Redux Thunk middleware allows you to write action creators that **return a function** instead of an action. The thunk can be used to **delay the dispatch** of an action, or to dispatch only if a certain condition is met. The **inner function receives** the store methods **dispatch and getState as parameters.**
+
+**<u>Using thunk:</u>**
+
+While initialising redux store, 1st argument is the reducer, and second argument is the middleware
+
+To use the middle ware in redux store `applyMiddleware` from `redux` function is used
+
+```
+import {applyMiddleware, createStore} from 'redux'
+
+import thunk from 'redux-thunk'
+
+const store = createStore(accountReducer, applyMiddleware(thunk))
+
+```
+
+and that's all we have to do to make use of middleware.
+
+now, to actually write the operation that the middleware will do before dispatching action to store, it will be done in Action creator function
+
+consider, we are depositing some money, and if the user choose some other currecy then we will have to convert the money to Dollar. So, we have to do some async operation and api/calls. And this is what we will do in middleware.
+
+```
+const function deposit(amount, currency) {
+  if(currency === "USD") {  -------> 1
+    return {type: "account/desposit", payload: amount};
+  }
+
+  // when currency is not dolar, then we have to convert it
+
+  return function(dispatch, getState) {
+    
+    // some api calls, and logic
+    const data = convert_to_dollar();
+
+    dispatch({type: "account/deposit", payload: data});
+  }
+}
+
+
+*dispatch(deposit(500, "EURO"));*
+```
+
+So what happens is, when we dipsatch with currency USD, then the action creator will just return the action (line 1)
+
+But, if the currency is not USD, then it will return a function. Now when the dispatch get's the function , then redux knows, that its a middleware and it calls it automatically, and also gives the function access to stores `dispatch` and `getState` method , which can then be used inside the middleware.
+
+
+
+### <u>Why react-redux when we can change and update state using dispath and getState method provided by store ?</u>
+
+react-redux provides bindings that integrate your Redux store with your React components seamlessly. It allows components to subscribe to the Redux store updates and re-render when the state changes. This integration simplifies the process of managing state in React applications.
+
+react-redux optimizes the rendering process by ensuring that only components that are directly affected by state changes re-render. It uses shallow equality checks to compare the previous and current state, preventing unnecessary re-renders and improving performance.
+
+By using react-redux, you adhere to common patterns and best practices for organizing your Redux code. It promotes separation of concerns by keeping your component logic separate from your state management logic, leading to a more maintainable and scalable codebase.
+
+So there really is no reason to use store to change in components **BUT :**
+
+**You would use store.dispatch** when you need to dispatch Redux actions directly **outside of React components**, such as **in utility functions**, middleware, or other parts of your application **that are not React components**
