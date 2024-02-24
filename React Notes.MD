@@ -2092,3 +2092,251 @@ By using react-redux, you adhere to common patterns and best practices for organ
 So there really is no reason to use store to change in components **BUT :**
 
 **You would use store.dispatch** when you need to dispatch Redux actions directly **outside of React components**, such as **in utility functions**, middleware, or other parts of your application **that are not React components**
+
+---
+
+## Redux Toolkit
+
+**Installation:** `npm i @reduxjs/toolkit`
+
+- The **modern and preferred** way of writing Redux code
+- An **opinionated** approach, forcing us to use Redux best practices
+- 100% compatible with "classic" Redux, allowing us to **use them together**
+- Allows us to write **a lot less code** to achieve the same result (*less "bolierplate"*)
+- Three major advantages:
+  1.  We can write code that **mutates**, state inside reducers (will be converted to **immutable** logic behind the scenes by "Immer" library)
+  2.  Action creators are **automatically** created
+  3.  **Automatic** setup of thunk middlewares and DevTools.
+
+
+1.  **Setting up store with RTK**
+
+    ```
+    import { configureStore } from "@reduxjs/toolkit"
+
+    const store = configureStore({
+      reducer: {
+        account: accountReducer,
+        user: userReducer
+      }
+    })
+    export default store;
+    ```
+
+    With just the above way of using store, our project will still work even if in other section we are using classic redux.
+
+2.  Before we were creating accountSlice, userSlice on our own, now RTK has a function for it.
+
+    ```
+    import {createSlice} from "@reduxjs/toolkit
+
+    const initialState = {
+      ...
+    }
+
+    const accountSlice = createSlice({
+      name: "account",
+      initialState,
+      reducers: {
+        deposit(state, action) {
+          state.balance = action.payload // mutating the state itself
+        }
+
+        // by default the reducers in RTK, only assume there will be only single value in payload, but if we want to recive multiple , like in case of request loan we had to give amount and purpose , for that we have to do:
+
+        requestLoan: {
+          prepare(amount, purpose) {
+            return {
+              payload: {amount, purpose}
+            }
+          },
+          reducer(state, action) {
+            // now action.payload has two values
+
+            state.loan = action.payload.amount;
+            state.loanPurpose = action.payload.purpose.
+          }
+        }
+
+      }
+    })
+    ```
+
+    Now if we will **print accountSlice**, we will see that it's an object, which **contains actions , reducer**
+
+    so we have to extract these to use them.
+    and the actions are created exactly like we created in classic redux like "account/deposit"
+    here, RTK adds name of the reducer with the function to achieve this name
+    ```
+    const {deposit, withdraw} = accountSlice.actions;
+    const reducer = accountSlice.reducer;
+    ```
+
+## Context API vs Redux
+
+### <u>Context API + useReducer</u>
+
+👍 Built into React
+👍 Easy to set up a **single context**
+👎 Additional state "slice" requires new context **set up from scratch** ("provider hell" in App.js)
+👎 **No** mechanism for async operations
+👎 Performance oprimization is a problem
+👎 Only React DevTools 
+
+When to use Context API ?
+
+***Use the context API for flobal state mamnagement in small aps.***
+
+- When you just need to share a value that **doesn't change often** [*color theme, preferred language, authenticated user,...*]
+
+- When you need to solve a simple **prop drilling** problem
+
+- When you need to manage state in a **local sub-tree** of the app
+
+### <u>Redux</u>
+
+👎 Requires additional package (larger bundle size)
+👎 More work to set up **initially**
+👍 Once set up, 'it's easy to create **additional state slices**
+👍 Supports **middleware** for async operations
+👍 Performance is optimized **out of the box**
+👍 Excellent DevTools
+
+When to use Redux ?
+
+***"Use Redux for global state management in large apps"***
+
+- When you have lots of global UI state that needs to be **updated frequently** (because Redux is optimized for this) [*shopping cart, current tabs, complex filters or search, ...*]
+
+- When you have **complex state** with nested objects and arrays (*because you can mutate state with Redux Toolkit*)
+    
+
+## React Router with Data Loading
+
+- The way we were creating routes works, but there is a better way.
+
+From v6.4, we can setup Router in a new way. 
+For example, when a route is accessed, we can fetch some data to show at the same time.
+Not like useEffect, where first the component is rendered and then data fetching is done.
+
+Code:
+
+1.  **Setting up routes (using createBrowserRouter)**
+
+    It takes list of objects, which consists of `path`, `element` and other properties.
+    ```
+    const router = createBrowserRouter(
+      [
+        {
+          path: "/menu",
+          element: <Menu />
+        }
+      ]
+    )
+
+2.  **Adding loader**
+
+    Let'say, when we hit menu route, then we want some data to be fetched. So, this is done using loader. In the menu route, we specify the loader property whih fetched the data the same time when route is hit.
+
+    <u>Menu.jsx</u>
+    ```
+    function Menu() {
+      
+    }
+    export function loader() {
+      const menu_data = apiCallToFetch();
+      return menu_data;
+    }
+    ```
+    Now, this loader needs to be specified where menu route has been set-up.
+    ```
+    {
+      path: "/menu",
+      element: <Menu />,
+      loader: loader
+    }
+    ```
+    Now, after data is fetched, it can be accessed inside the Menu component using hook `useLoaderData()`
+
+    This way of fetching data is termed as **"Render as you fetch Strategy"**
+
+    *Loader function by default recieves an object as argument, and has params as one of the property*
+
+    Since, loader is not a hook, so we cannot use useParams hook to get the params from url. Instead react-router passes an object to the loader function and has params as one of its propery. So, there we have the params access.
+
+3.  **Showing Loading indicator when data is fetched**
+    Here, we will use another hook `useNavigation` which will tell us the state of the application like `idle`, `loading` or `submitting`.
+    and based on that we will show loading animation.
+    *Note: This loading is shown when data is fetching using Router*
+
+    ```
+    const navigation = useNavigation();
+    const isLoading = navigation.state === "loading"
+
+    return (
+      {isLoading && <LoadingAnimation />}
+    )
+    ```
+
+4.  **Error handling with Error Elements**
+
+    With createBrowserRouter when there is **any error** in **loader, action** or while **rendering a component**, we can render an Error Element instead of the element that needs to be rendered on a particular route.
+
+    ```
+    {
+      path: "/menu",
+      element: <Menu />,
+      loader: loader,
+      errorElement: <Error />
+    }
+    ```
+    Now, if there is any error while accessing menu route, then Error element will be rendered . Now to know what type of error has occurred, react-router gives a hook `useRouterError()` , which we can use in `Error` component.
+
+    ```
+    const error = useRouterError();
+
+    return (
+      <div>{error.message || error.data}</div>
+    )
+    ```
+5.  **Writing data with React Router Actions**
+
+    Like loaders are used to read data, Actions are used to write or mutate data/state that is stored on some server. 
+    *For example, submitting a form.*
+
+    So, we can specify an action like following:
+
+    ```
+    {
+      path: "/createOrder",
+      element: <CreateOrder />
+      action: createOrderAction
+    }
+    ```
+    Creating order:
+    ```
+    export default function createOrder() {
+
+      return <Form method="POST">
+
+      </Form>
+    }
+    async function action({request}) {
+      const formData = await request.formData();
+      const data = Object.entries(formData);
+
+      redirect(`/data/${data.orderId}`)
+    }
+    ```
+
+    So, React-router dom gives us a speacial `Form` ,which is easier to setup and submit data.
+
+    and since we are useing this form, on submitting it calls the action function that we have specified while setting up the route. And it calls this function with `request` object which `contains` the `formdata`.
+
+    Now, it's required to return something from this action function. So, if we don't have anything to return just `return null;`
+
+    And this returned data can be accessed in the component using hook `useActionData`.
+
+    It's mostly used to return any errors tha might occur in action function while submitting forms, so that we can display the error on page.
+
+    else we can also redirect to other page by using `redirect` function react-router.
