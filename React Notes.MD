@@ -2172,6 +2172,16 @@ So there really is no reason to use store to change in components **BUT :**
     const reducer = accountSlice.reducer;
     ```
 
+    ***Calling reducer inside another reducer:***
+    ```
+    we have two reducers above, deposit and request loan
+    Let's say we want to execute deposit reducer from requestLoan.
+
+    in requestLoan reducer:
+    accountSlice.caseReducers.deposit(state, action)
+
+    ```
+
 ## Context API vs Redux
 
 ### <u>Context API + useReducer</u>
