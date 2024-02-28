@@ -2080,6 +2080,47 @@ So what happens is, when we dipsatch with currency USD, then the action creator 
 But, if the currency is not USD, then it will return a function. Now when the dispatch get's the function , then redux knows, that its a middleware and it calls it automatically, and also gives the function access to stores `dispatch` and `getState` method , which can then be used inside the middleware.
 
 
+#### Creating thunk using Redux ToolKit
+
+using: `createAsyncThunk`
+it recieves two arguments:
+1.  `Action name`
+2.  `Async function` that will return payload for the reducer
+
+This `action name` will not be used by us. Redux will use it internally.
+
+This createAsyncThunk will produce three additional action type:
+1.  for Pending promise state
+2.  for Fulfilled state
+3.  for Rejected state
+
+This states needs to be handled separately in the reducer.
+```
+async function fetchApi = createAsyncThunk("action name", async function () {
+  ... fetch logic
+}) 
+
+const userSlice = createSlice({
+  name: 'user',
+  initialState,
+  reducers: {
+    updateName(state, action) {
+
+    }
+  },
+  extraReducers: (builder) => builder.addCase(fetchApi.pending, (state, action) => {
+    ...
+    .addCase(fetchApi.fulfilled, (state, action) => {
+      ...
+    })
+    .addCase(fetchApi.rejected, (state, action) => {
+      ...
+      here, the errror message is given by redux in - action.error.message
+    })
+  })
+})
+
+```
 
 ### <u>Why react-redux when we can change and update state using dispath and getState method provided by store ?</u>
 
@@ -2350,3 +2391,31 @@ Code:
     It's mostly used to return any errors tha might occur in action function while submitting forms, so that we can display the error on page.
 
     else we can also redirect to other page by using `redirect` function react-router.
+
+### useFetcher() hook
+
+sometimes you want to call a loader outside of navigation, or call an action (and get the data on the page to **revalidate**) **without changing the URL**. Or you need to have multiple mutations in-flight at the same time.
+Then this hook helps to accomplish this. 
+
+This is useful when you need to:
+
+- fetch data not associated with UI routes (popovers, dynamic forms, etc.)
+- submit data to actions without navigating (shared components like a newsletter sign ups)
+- handle multiple concurrent submissions in a list (typical "todo app" list where you can click multiple buttons and all should be pending at the same time)
+- infinite scroll containers
+and more!
+
+**using useFecther to call loader manually**
+
+There might be a case where we need the data of another route inside some other route. For, this we can use fetcher.load("/route") to call the loader function of that rute manually, and it will fetch the data.
+
+```
+const fetcher = useFetcher();
+
+useEffect(() => {
+  fetcher.load("/route");
+}, [fetcher])
+```
+
+This load, will store the result in `fetcher.data` and we also get the current state by `fetcher.state` which can be `idle`, `submitting`, `loading`
+
