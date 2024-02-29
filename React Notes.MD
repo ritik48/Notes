@@ -2392,6 +2392,15 @@ Code:
 
     else we can also redirect to other page by using `redirect` function react-router.
 
+    So, using this `Form` provided by `react-router` is better than, using regular html form. As, here we dont have to set -up state variable for each field that we want take input from user. 
+
+
+### Benefits of using a data loader function instead of fetching data in a useEffect in a component
+
+- Don't need to worry about handling loading state in the component.
+- Don't need to have lengthy/confusing useEffect code in our component.
+- Don't need to ahndle error state in the component
+
 ### useFetcher() hook
 
 sometimes you want to call a loader outside of navigation, or call an action (and get the data on the page to **revalidate**) **without changing the URL**. Or you need to have multiple mutations in-flight at the same time.
