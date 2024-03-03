@@ -1,43 +1,33 @@
-let s = "hellow world practice";
 
-/*
 
-5 basic primitive types
+### 5 basic primitive types
 
-Number
-String
-Boolean
-Null -> intentional lack of value, explicitly specified
-Undefined -> variables not assigned any value are undefined,
+- Number
+- String
+- Boolean
+- Null -> **intentional lack of value**, explicitly specified
+- Undefined -> variables **not assigned any value** are undefined,
             or when there is no possible result
 
-*/
+#### Some methods on string
 
-/*
+- s.trim() remove whitespaces around
+- s.toUpperCase()
+- s.indexOf('ll') -> 2 if not found -1
+- s.slice(begin_index, end_index) just like substr()
+- s.replace('hello', 'namaste')
 
-console.log(s.length)
+- 'top'.repeat(3) -> toptoptop
 
-s.trim() remove whitespaces around
-s.toUpperCase()
-s.indexOf('ll') -> 2 if not found -1
+---
 
-s.slice(begin_index, end_index) just like substr()
+**Generate random number**
 
-s.replace('hello', 'namaste')\
+`Math.random()` -> 0 to 1
 
-'top'.repeat(3) -> toptoptop
+`Math.floor( Math.random() * 5) + 1` -> random number from 1 to 5
 
-*/
 
-/*
-
-Math.random() -> 0 to 1
-
-Math.floor( Math.random() * 5) + 1 -> random number from 1 to 5
-
-*/
-
-/*
 
 == -> check for equality of value, not equality of type
 converts both value to same type then compares
