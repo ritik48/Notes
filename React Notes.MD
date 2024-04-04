@@ -1058,7 +1058,7 @@ _Note: These rules are **automatically enforced by** React's ESLint rules_
 
 -   Do **NOT** read write in render logic(like state)
 
--   Calue of ref is accessed using `.current`
+-   Value of ref is accessed using `.current`
 
 ![Alt text](images/image-38.png)
 
