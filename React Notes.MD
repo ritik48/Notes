@@ -99,9 +99,9 @@ root.render(
 -   **Declarative syntax** to **describe** what components **look like** and **how they work**.
 
 -   **Components must return** a block of **JSX**
--   **Extension of JavaScipt that allows us to embedd JavaScript, CSS, and React components into HTML.**
+-   **Extension of JavaScipt that allows us to embedd HTML. like code within Javascript**
 
--   JSX is converted to javascript using a tool called Babel. it is automatically included in project when creating a project.
+-   JSX is converted to regular javascript code using a tool called Babel. it is automatically included in project when creating a project.
 
     Each JSX element is **converted** to a React.createElement function call.
 
@@ -1058,7 +1058,7 @@ _Note: These rules are **automatically enforced by** React's ESLint rules_
 
 -   Do **NOT** read write in render logic(like state)
 
--   Calue of ref is accessed using `.current`
+-   Value of ref is accessed using `.current`
 
 ![Alt text](images/image-38.png)
 
