@@ -1,5 +1,17 @@
 # Docker Notes
 
+### What is an Image ?
+
+A docker image is a template which contains set of instructions which will be used to create a container. Think of an image like a blueprint or snapshot of what will be in a container when it runs.
+
+An image is composed of multiple stacked layers, like layers in a photo editor, each changing something in the environment. Images contain the code or binary, runtimes, dependencies, and other filesystem objects to run an application.
+
+### what is a Container ?
+
+A container is a running instance of an image. It is a lightweight, standalone, executable package that includes everything needed to run a piece of software, including the code, runtime, system tools, system libraries, and settings.
+
+---
+
 Dockerfile to create an image of our express app
 
 ```
@@ -7,12 +19,12 @@ FROM node:20 -> base image from which we want to create an image for
                 our application
 
 WORKDIR usr/src/app -> this is the path where our application/code will be
-                       stores in the image
+                       stored in the image
 
 COPY . . -> means copy everthing from current folder to that WORKDIR
 
 RUN npm install -> runs npm install to get all the required package while   
-                   creting image
+                   creating image
 EXPOSE 3000
 
 CMD ["node", "index.js"] -> this runs when we start the container
@@ -25,22 +37,22 @@ CMD ["node", "index.js"] -> this runs when we start the container
 2. Display all running containers
 
     `docker ps`
-3. Display all images
+4. Display all images
 
     `docker images`
-4. Start a container from an image
+5. Start a container from an image
 
     `docker run image_name`
-5. Port mapping: forward the request coming on a particular port on your machine to a port exposed in the container
+6. Port mapping: forward the request coming on a particular port on your machine to a port exposed in the container
 
     `docker run -p 3000:3000 image_name`
 
     here, the request that will come on port 3000 on your windows will be forward to port 3000 open in your container
-6. Stop a container
+7. Stop a container
 
     `docker stop container_id`
 
-7. We can also give names to conatainer
+8. We can also give names to conatainer
 
     `docker run -p 3000:3000 --name container_name image_name`
 
