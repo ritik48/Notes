@@ -126,3 +126,114 @@ Let's say we have an express server running inside container A, and a mongo serv
 -   Now, in express server we will use the following url to connect to the mongodb server running in the container
 
     `mongoose.connect("mongodb://mongo_container:27017/my_db")`
+
+---
+
+### ENV Variables
+
+Let's say we are using Environment variable inside out js file, like for port number, then to pass the port number from command line itself to the nodejs process we can do:
+
+`PORT=8000 node index.js`
+
+now, we can access it inside js file like:
+
+`process.env.PORT`
+
+To pass the environment variables inside container, we can use `-e` tag followed by environment variable.
+
+`Docker run -p 3000:3000 -e MONGO_URI=SOME_URI mongo_image`
+
+
+---
+
+### Multi-stage builds
+
+Let's say we we want to run different command when container starts, like 
+
+`on development: node index.js`
+
+`on production: nodemon index.js`
+
+So, for this we can create a docker file where we can specify multiple stages. And while creating an image, we can only use a specific stage
+
+With multi-stage builds, you use multiple `FROM` statements in your Dockerfile. Each `FROM` instruction can use a different base, and each of them begins a new stage of the build.
+
+Example of docker file with three stages, one will be common i.e, from which all other stages will start
+```
+FROM node:20 AS base
+WORKDIR user/src/app
+COPY package*.json .
+RUN npm install
+
+FROM base as development
+COPY . .
+CMD ["nodemon", "index.js"]
+
+FROM base as production
+COPY . .
+RUN npm prune --development
+CMD ["node", "index.js"]
+```
+Here, we are creating 3 images. Only, image 2 and 3 use image 1 as their base image.
+
+**Explaination of above dockerfile.**
+
+-   `FROM node:20 AS base: `
+
+    This line specifies the base image for the Docker container. In this case, it's a Node.js image version 20. It sets up the base environment for the subsequent instructions.
+
+-   `WORKDIR /user/src/app: `
+
+    This sets the working directory inside the Docker container to /user/src/app. This is where the application code and files will be copied and where subsequent commands will be executed.
+
+-   `*COPY package.json .**:` 
+
+    This instruction copies the package.json and package-lock.json (if it exists) from the local file system into the /user/src/app directory in the Docker container. These files are needed for npm to install dependencies.
+
+-   `RUN npm install: `
+
+    This command installs the dependencies listed in the package.json file into the Docker container. It's executed within the /user/src/app directory.
+
+-   `FROM base AS development:` 
+
+    This line creates a new stage in the Dockerfile based on the base stage. This is called a multi-stage build. It allows you to separate build-time dependencies from runtime dependencies, reducing the size of the final Docker image.
+
+-   `COPY . .: `
+
+    This instruction copies all files from the current directory (presumably the application code) into the Docker container's /user/src/app directory.
+
+-   `CMD ["nodemon", "index.js"]: `
+
+    This sets the default command to run when the container starts in development mode. It uses nodemon to watch for changes in the files and automatically restart the Node.js application when changes are detected.
+
+-   `FROM base AS production: `
+
+    This creates another stage in the Dockerfile based on the base stage.
+
+-   `COPY . .: `
+
+    Similar to the development stage, this instruction copies all files from the current directory into the Docker container's /user/src/app directory.
+
+-   `RUN npm prune --development:` 
+
+    This command removes development dependencies from the node_modules directory. It's done to reduce the size of the production image since development dependencies are not needed in the production environment.
+
+-   `CMD ["node", "index.js"]:` 
+
+    This sets the default command to run when the container starts in production mode. It runs the Node.js application directly without any watching mechanism like nodemon, which is suitable for production environments.
+
+
+Now, to create an image from a aprticular stage, we use  `--target stage_name` with the build command.
+
+To create an image for development:
+
+`docker build . --target development -t dev_image`
+
+To create an image for production:
+
+`docker build . --target production -t prod_image`
+
+
+---
+
+
