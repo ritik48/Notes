@@ -23,7 +23,7 @@ WORKDIR usr/src/app -> this is the path where our application/code will be
 
 COPY . . -> means copy everthing from current folder to that WORKDIR
 
-RUN npm install -> runs npm install to get all the required package while   
+RUN npm install -> runs npm install to get all the required package while
                    creating image
 EXPOSE 3000
 
@@ -31,28 +31,34 @@ CMD ["node", "index.js"] -> this runs when we start the container
 ```
 
 ### Docker commands
+
 1. Create an image from this docker file
 
     `docker build . -t test_app`
+
 2. Display all running containers
 
     `docker ps`
-4. Display all images
+
+3. Display all images
 
     `docker images`
-5. Start a container from an image
+
+4. Start a container from an image
 
     `docker run image_name`
-6. Port mapping: forward the request coming on a particular port on your machine to a port exposed in the container
+
+5. Port mapping: forward the request coming on a particular port on your machine to a port exposed in the container
 
     `docker run -p 3000:3000 image_name`
 
     here, the request that will come on port 3000 on your windows will be forward to port 3000 open in your container
-7. Stop a container
+
+6. Stop a container
 
     `docker stop container_id`
 
-8. We can also give names to conatainer
+7. We can also give names to conatainer
 
     `docker run -p 3000:3000 --name container_name image_name`
 
@@ -60,17 +66,18 @@ Exch step in the dockerfile is basically termed as layer.
 If any layer change, then all the layer from that to the end will not use cached version of the previous build, instead will start fresh.
 
 #### Why layers ?
+
 -   Caching
 -   Re-using layers
 -   Faster Build time
 
 When we do docker build to create an image, then some files get downloaded like base image from whcih we are creating and further the steps that we have written in the dockerfile.
 
-Now, if we build from the same file again then the process will take comparativly less time, as docker caches the steps. So if at a particular step it finds that it has executed it before and has the required files then it uses from cache. 
+Now, if we build from the same file again then the process will take comparativly less time, as docker caches the steps. So if at a particular step it finds that it has executed it before and has the required files then it uses from cache.
 
 But, for a particular step in dockerfile, if it finds that something has changes then from that step to the end of dockerfile, it doesn't use the cache instead freashly downloads the required dependencies.
 
-But this might cause performance issue, like lets say we changed index.js file then from this step i.e, `COPY . .` it will reject the cache and will start fresh , which means in the further step `npm install` will also run, which logically should not happen as  package.json didn't change. So we need some way to avoid this issue. 
+But this might cause performance issue, like lets say we changed index.js file then from this step i.e, `COPY . .` it will reject the cache and will start fresh , which means in the further step `npm install` will also run, which logically should not happen as package.json didn't change. So we need some way to avoid this issue.
 
 Solution:
 Introduce a new layer, where we first copy the package.json file, and then run npm install and then copy all the files, then it will solve the issue. Now even if the index.js file changeds, still as the first step is package.json, and sicne it didn't change so the npm install will not run again in the subsequent build.
@@ -98,6 +105,7 @@ CMD ["node", "index.js"]
 ## Volumes and Networks
 
 ### Volumes
+
 -   Used to persists data across starts
 -   specifically usefull for things like database
 
@@ -114,12 +122,14 @@ In the context of Docker, when we mount a volume inside a container, it essentia
 Now, whenever we run the mongo container with this volume, then the data will persists, as volumes exists outside of the container lifecycle.
 
 ---
+
 ### Networks
 
 It basically allows two containers to communicate with each other.
 Let's say we have an express server running inside container A, and a mongo server running inside container B, then Networks allows these two to talk to each other.
 
 #### Commands
+
 -   To display available networks
 
     `docker network ls`
@@ -127,13 +137,14 @@ Let's say we have an express server running inside container A, and a mongo serv
 -   First, create a network
 
     `docker network create my_network`
+
 -   Attach network to a container (express server)
-    
+
     `docker run -p 3000:3000 --network network_name image_name`
 
-- Attach mongo container also to the same network, we will also give the mongo container a name so that we can use it to communicate with this container from express server running on the same network
+-   Attach mongo container also to the same network, we will also give the mongo container a name so that we can use it to communicate with this container from express server running on the same network
 
-    `docker run -p 27017:27017 --name mongo_container --network network_name mongo` 
+    `docker run -p 27017:27017 --name mongo_container --network network_name mongo`
 
 -   Now, in express server we will use the following url to connect to the mongodb server running in the container
 
@@ -155,12 +166,11 @@ To pass the environment variables inside container, we can use `-e` tag followed
 
 `Docker run -p 3000:3000 -e MONGO_URI=SOME_URI mongo_image`
 
-
 ---
 
 ### Multi-stage builds
 
-Let's say we we want to run different command when container starts, like 
+Let's say we we want to run different command when container starts, like
 
 `on development: node index.js`
 
@@ -171,6 +181,7 @@ So, for this we can create a docker file where we can specify multiple stages. A
 With multi-stage builds, you use multiple `FROM` statements in your Dockerfile. Each `FROM` instruction can use a different base, and each of them begins a new stage of the build.
 
 Example of docker file with three stages, one will be common i.e, from which all other stages will start
+
 ```
 FROM node:20 AS base
 WORKDIR user/src/app
@@ -186,6 +197,7 @@ COPY . .
 RUN npm prune --development
 CMD ["node", "index.js"]
 ```
+
 Here, we are creating 3 images. Only, image 2 and 3 use image 1 as their base image.
 
 **Explaination of above dockerfile.**
@@ -198,7 +210,7 @@ Here, we are creating 3 images. Only, image 2 and 3 use image 1 as their base im
 
     This sets the working directory inside the Docker container to /user/src/app. This is where the application code and files will be copied and where subsequent commands will be executed.
 
--   `*COPY package.json .**:` 
+-   `*COPY package.json .**:`
 
     This instruction copies the package.json and package-lock.json (if it exists) from the local file system into the /user/src/app directory in the Docker container. These files are needed for npm to install dependencies.
 
@@ -206,7 +218,7 @@ Here, we are creating 3 images. Only, image 2 and 3 use image 1 as their base im
 
     This command installs the dependencies listed in the package.json file into the Docker container. It's executed within the /user/src/app directory.
 
--   `FROM base AS development:` 
+-   `FROM base AS development:`
 
     This line creates a new stage in the Dockerfile based on the base stage. This is called a multi-stage build. It allows you to separate build-time dependencies from runtime dependencies, reducing the size of the final Docker image.
 
@@ -226,16 +238,15 @@ Here, we are creating 3 images. Only, image 2 and 3 use image 1 as their base im
 
     Similar to the development stage, this instruction copies all files from the current directory into the Docker container's /user/src/app directory.
 
--   `RUN npm prune --development:` 
+-   `RUN npm prune --development:`
 
     This command removes development dependencies from the node_modules directory. It's done to reduce the size of the production image since development dependencies are not needed in the production environment.
 
--   `CMD ["node", "index.js"]:` 
+-   `CMD ["node", "index.js"]:`
 
     This sets the default command to run when the container starts in production mode. It runs the Node.js application directly without any watching mechanism like nodemon, which is suitable for production environments.
 
-
-Now, to create an image from a aprticular stage, we use  `--target stage_name` with the build command.
+Now, to create an image from a aprticular stage, we use `--target stage_name` with the build command.
 
 To create an image for development:
 
@@ -245,7 +256,80 @@ To create an image for production:
 
 `docker build . --target production -t prod_image`
 
+---
+
+#### Assignment
+
+Curently, If you start a container in development mode which uses nodemon, then when you edit the index.js file inside the container, then nodemon will restart the server. But if you edit it outside, basically the file which is present locally, it won't restart the nodemon.
+So, what should you do, so that even while editing the file locally should make nodemon to re-run the server ?
+
+#### Solution:
+
+We will use volume here. As we know that volumes allows us to mount a folder inside container, such that they are linked, meaning anychage to the containers file will be affected locally and any change locally will affect the container too.
+
+So, we will mount the local project folder to the containers project folder. Doing so, will make them connected and any change made in file locally will also reflect inside the containers file system as well.
+
+**command:**
+
+`docker run -p 3000:3000 -v .:/user/src/app image_name`
+
+it mounts `. (current directory locally)` to `"/usr/src/app" (directory in container)`
 
 ---
 
+### Docker Compose
+
+A project has a lot of auxillary dependency it needs to use like mongodb/kafka/redis ... , this requires us to run multiple docker commands. So, we have to start multiple terminals and execute different commands, but this approach is not efficient and prone to errors. 
+
+Instead, we can use `Docker Compose` to manage and run all the required services with a single command, simplifying the process and ensuring that all dependencies are correctly configured and started together.
+
+Compose is a tool used for defining and **running muti-container** Docker Applications. With compose, you use a **YAML file** to **configure your application's services**. Then, with a single command, you create and start all the services from your configuration.
+
+docker-compose.yaml
+
+
+    services:
+        mongodb_db:
+            image: mongo:latest
+            ports:
+                - 27017:27017
+    
+        my-app:
+            build: ./
+            ports:
+                - 3000:3000
+
+**Command to run this:**
+
+`docker-compose up`
+
+When we run docker-compose, it `automatically creates a network`, and therefore all the services are connected to each othe, means they can communicate with each other. And the containers can be referenced by their name, here `mongodb_db`, `my-app`
+
+So, if I want my-app to cnnect with the mongodb, the url will be
+
+`mongoose.connect(mongodb://mongodb_db:27017/my-db)`
+
+How to create Volumes ?
+
+Volumes can be added as a key to the YAML file and can be referenced by all containers.
+
+e.g,
+
+docker-compose.yaml
+
+
+    services:
+        mongodb_db:
+            image: mongo:latest
+            ports:
+                - 27017:27017
+            volumes:
+                - mongo_volume:/data/db
+    
+        my-app:
+            build: ./
+            ports:
+                - 3000:3000
+    volumes:
+        mongo_volume:
 
