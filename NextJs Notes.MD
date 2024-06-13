@@ -130,3 +130,150 @@ How Hydration Works ?
 ### Creating a Next App
 
 `npx create-next-app@latest folder-name`
+
+
+### React Server Component (RSC)
+
+- A full stack architecture for React apps
+
+- Introduces server as an integral part of React component trees: **server components**
+
+- We write **frontend code** next to **backend code**
+
+- RSC is **not active by default** in new React apps (e.g. Vite apps):
+    it needs to be **implemented** by a framework like **Nextjs** (app router)
+
+The component we write in nextjs are server component by default.
+
+**Client Component :**
+
+- Regular components
+- Created with `"use client"` directive at the top of the module
+- They are typically rendered on the client-side (CSR) but, they can also be rendered to HTML ont he server (SSR), allowing users to immediately see the page's HTML conetnt rather than a blank screen
+
+- Have access to client environment, such as the browsers, allowing them to use state, effects and vent listeners to handle interactivity and also access browser-exclusive APIs like geolocation or localStorage, allowing you to build UI for specific use cases.
+
+
+
+**Server components :**
+
+-   **Compoenents that are only rendered on the server**
+- And unlike client components, their code stays on the server and is never donloaded to the client
+-   Don't make it into the bundle
+-   We can build the backend with React
+-   **Default** in apps that use the RSC architecture (Nextjs)
+
+Benefits of SErver components
+
+- **Reduced Bundle Sizes**
+    Server components do not send code to the client, allowing large dependencies to remain server-side
+
+    This benefit users with slower internet connections be eliminating the need to download, parse and execute Javascript for these components
+
+- **Enahanced security**
+    It enhances security by keeping sensitive data and logic, including tokens and API keys, away from the client-side
+
+- **Improved Data Fetching**
+
+- **Caching**
+    Rendering on the server enables caching of results, which can be reused in subsequent requests and across different users
+
+- **Efficient Streaming**
+    Server components allow the rendering process to be divided into manageable chunks, which are then streamed to the client as soon as they are ready
+
+    This allows users to start seeing parts of the page earlier, eliminating the need to wait for the entire page to finish rendering on the server
+
+- **Improved SEO**
+
+![alt text](image-4.png)
+
+![alt text](image-5.png)
+
+#### Why RSC Payload ? Why not render Server Component's as HTML ?
+
+- **When a SC is re-rendered:** React is able to merge ("reconcile") the **current** tree on the client with a **new tree** coming from the server
+
+- As a result, UI **state can be preserved** when a SC re-renders, instead of completely re-generating the pages as HTML
+
+
+--- 
+
+#### Understanding App router
+
+Inside app folder, if there is a `page.tsx` file, then this is what will be rendered on the root route.
+
+Now, to make different routes, create a folder and inside that folder put page.tsx
+i.e.,
+
+- app
+    - About
+        - page.tsx
+    - page.tsx
+
+Accoording to above structure , we have two routes here:
+1.  /
+2.  /About
+
+Now, to avoid a folder anme in the route, create a folder and name it inside the brackets.
+
+- app
+    - (auth)
+        - signin
+            - page.tsx
+        - signup
+            - page.tsx
+
+Here, we can access signin and signup as, `/signin` and `/signup`, no need to include `auth` in the path.
+
+#### Layouts
+
+Every route cana lso have layouts. To create a layout use `layout.tsx` as a file name.
+
+And, here other components can be passed as a children props.
+
+#### Loading
+
+To show loading state when a server component is taking time fecthing data, we can show a loading state.
+For this as well, we have a convention to create a loading state.
+
+In Whatever route you feel it will take time to load a component, you can create a `loading.tsx` file with the loader component in it.
+
+And that's it, it will automatically show the loading state when a component is taking time to be displayed.
+
+
+## API routes in NextJs
+
+Nextjs lets you wite backend routes, just like express does.
+This is why next is considered as a `full stack` framework.
+
+The benefits of using NextJs for a backend includes:
+
+1.  Code in a single repo
+2.  All standard things you get in a backend framework like express.
+3.  Server components can directly talk to the backend.
+
+### Let's create a route which return some data
+
+So, to setup backend routes in NextJs, we have to follow these coventions:
+
+1.   Create `api` folder inside `app`
+2.   For each route create a folder 
+    
+    Let's say we want to create `/user` route 
+    Then, we will have to create a folder `user` and iside this we will have a file `route.ts`.
+
+    -   app
+        -   api
+            -   user
+                -   route.ts
+3.  We can create different route handlers inside this `route.ts`
+
+    - GET Route
+        ```
+        export function GET(req: NextRequest) {
+            const body = req.json()
+            
+            Response.json({name: "Ritik", email: "ritik@gmail.com"})
+        }
+        ```
+    Like wise for POST, PUT routes
