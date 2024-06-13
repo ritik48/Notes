@@ -572,7 +572,7 @@ With component composition, we can:
 
 ### Component vs Instance vs Element
 
-![Alt text](images/image-5.png)
+![Alt text](images/images/image-49.png)
 
 #### Component
 
@@ -602,7 +602,7 @@ With component composition, we can:
 
 #### DOM Element (HTML)
 
-![Alt text](images/image-4.png)
+![Alt text](images/images/image-48.png)
 
 -   Actual **visual representaion** of the component instance in the browser
 
