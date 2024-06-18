@@ -29,49 +29,59 @@
 
 
 
-== -> check for equality of value, not equality of type
+`==` -> check for equality of value, not equality of type
+
 converts both value to same type then compares
 
-1 == '1' -> true
-0 == false -> true
+`1 == '1'` -> true
 
-=== -> strict equality operator, equality of both value and type
+`0 == false` -> true
 
-1 === '1' -> false
-0 ==== false -> false
+`===` -> strict equality operator, equality of both value and type
 
-*/
+`1 === '1'` -> false
 
-/*
------------------- FALSE VALUES
+`0 ==== false` -> false
+
+**-----FALSE VALUES-----**
+
 flase
+
 0
+
 ""
+
 null
+
 undefined
+
 NaN
-*/
 
-/*
 
-push() -> add element in the end of array
-
+`push()` -> add element in the end of array
+```
 let a = ['jfen','wef','wewef']
 a.push('hey');  -> changes original array
 output - ['jfen', 'wef', 'wewef', 'hey']
+```
 
-
-pop() -> remove last element from array and return that value
+`pop()` -> remove last element from array and return that value
+```
 a.pop()
 output - ['jfen', 'wef', 'wewef']
+```
 
-shift() -> remove from start
+`shift()` -> remove from start
+```
 a.shift()
 output - ['wef', 'wewef']
+```
 
-unshift() -> add element in the beginning
+`unshift()` -> add element in the beginning
+```
 a.unshift('hey')
 output - ['hey', 'wef', 'wewef']
+```
 
 let a=['a','b']
 let b=['c','d']
@@ -117,9 +127,6 @@ a.100 -> wrong
 
 a.number = 90 -> modifies the object
 
-*/
-
-/*
 
 ---------------- For Loops
 
