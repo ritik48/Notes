@@ -276,4 +276,36 @@ So, to setup backend routes in NextJs, we have to follow these coventions:
             Response.json({name: "Ritik", email: "ritik@gmail.com"})
         }
         ```
-    Like wise for POST, PUT routes
+        Like wise for POST, PUT routes
+
+---
+
+## Server Actions
+
+Server Actions are asynchronous functions that are executed on the server. They can be used in Server and Client Components to handle form submissions and data mutations in Next.js applications.
+
+
+Server Components can use the inline function level or module level "use server" directive. To inline a Server Action, add "use server" to the top of the function body:
+
+e.g.
+
+```
+function getPost() {
+    "use server";
+
+    // get post
+
+    return post;
+}
+
+```
+
+Now the way we have created above server action function can be used only by server component. To use it in client components as well we need to use the module-level `"use server"` directive.
+
+```
+"use server"
+
+export async function create() {
+  // ...
+}
+```
