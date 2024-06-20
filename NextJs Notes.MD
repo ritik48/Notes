@@ -210,11 +210,11 @@ i.e.,
         - page.tsx
     - page.tsx
 
-Accoording to above structure , we have two routes here:
+According to above structure , we have two routes here:
 1.  /
 2.  /About
 
-Now, to avoid a folder anme in the route, create a folder and name it inside the brackets.
+Now, to avoid a folder name in the route, create a folder and name it inside the brackets.
 
 - app
     - (auth)
@@ -227,13 +227,13 @@ Here, we can access signin and signup as, `/signin` and `/signup`, no need to in
 
 #### Layouts
 
-Every route cana lso have layouts. To create a layout use `layout.tsx` as a file name.
+Every route can also have layouts. To create a layout use `layout.tsx` as a file name.
 
 And, here other components can be passed as a children props.
 
 #### Loading
 
-To show loading state when a server component is taking time fecthing data, we can show a loading state.
+To show loading state when a server component is taking time fetching data, we can show a loading state.
 For this as well, we have a convention to create a loading state.
 
 In Whatever route you feel it will take time to load a component, you can create a `loading.tsx` file with the loader component in it.
