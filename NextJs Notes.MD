@@ -423,3 +423,298 @@ export async function create() {
   // ...
 }
 ```
+
+---
+
+## NextAuth
+
+It is a library which helpls to setup auth in nextjs.
+
+We can setup all kind of authentication like email based, google, facebook, etc
+
+### How to setup ?
+
+First we need to create `/api/auth` route and give NextAuth access to catch-all route basically any request ending with `/api/auth` will be handled by NextAuth
+
+So, we will create api route like this:
+
+-   app
+    -   api
+        - auth
+            - [...nextAuth]
+                - page.tsx
+
+Inside page.tsx
+
+We will create `handler` and `provider`
+
+```
+
+import NextAuth from "next-auth"
+
+const handler = NextAuth({
+    // here we have to provide the providers with which we want to authneticate
+})
+
+export const GET = handler;
+export const POST = handler;
+
+```
+
+We will use `CredentialsProvider`. It allows us to setup authentication using arbitrary credentials, meaning we can structure our authnetication however we like.
+
+```
+import NextAuth from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+
+const handler = NextAuth({
+    providers: [
+        CredentialsProvider(
+            {
+                // The name to display on the signin form. Like "Sign in with..."
+                name: "EmailAuth"
+
+                // The credentials is used to genrate a suitable form on the signin page.
+                // You can specify whatever fields you are expecting to be submitted.
+                // 
+                credentials: {
+                    username: {
+                        label: "Username", type: "text", placeholder: "username"
+                    },
+                    password: {
+                        label: "Password", type: "password", placeholder: "password"
+                    }
+                }
+                async authorize(credentials, req) {
+
+                    // here will be the logic of handling the user submitted data
+                    // and return the data that will contain user info
+
+                    // if we return false/null from here, it will mean that there was error while authentication and this error is automatically displayed by next-auth on the signin page.
+
+                    retutn {
+                        id: 1
+                    }
+                }
+            }
+        )
+    ],
+    secret: process.env.NEXTAUTH_SECRET
+})
+
+export const GET = handler;
+export const POST = handler;
+
+```
+
+The `id` in the object that authorize function returned will not be present when we log the `session` from useSession or getServerSession. 
+
+This can be changes while using `calbacks` which we will see below.
+
+Just writing above code, gives us automatically created `signin` page. 
+
+That is, now we can access `/api/auth/signin`. And it will have a form with `username` and `password` that we provided above.
+
+Next Step:
+
+Create `providers.tsx` file, from here we will export the provider which whill wrap around the entire app, so that everyone has access to it's context.
+
+And it will be a client component as we cannot use context inside a server component.
+
+providers.tsx
+```
+"use client"
+
+import { SessionProvider } from "next-auth/react";
+
+export function Providers({children}) {
+    return <SessionProvider>
+                {children}
+            </SessionProvider>
+}
+
+```
+
+Now, in the root layout we will wrap the `children` with this provider.
+
+```
+import {signIn, signOut} from "next-auth/react"
+```
+
+we can directly use `signIn()` to go to the signIn page and `signOut()` to log out the user
+
+### Accessing the Authenticated user's data
+
+-   `useSession()` hook
+
+    It is used to access the user's data inside client component
+
+    ```
+    "use client";
+
+    import {useSession} from "next-auth/react"
+
+    function AppBar() {
+        const session = useSession()
+
+        return <div> {JSON.stringify(session)} </div>
+    }
+    ```
+
+-   `getServerSession()` function
+
+    It is used to access the user's data inside server component
+
+    ```
+    import { getServerSession } from "next-auth"
+
+    async function Home() {
+        const session = await getServerSession()
+
+        return <div> {JSON.stringify(session)} </div>
+    }
+
+    ```
+---
+
+### Callbacks in NextAuth
+
+These are asynchronous functions whcih we can use to hook into certain step of authentications, like while signin, jwt creation, session creation.
+
+This basically is helpful when we need to do extra operation in these steps.
+
+
+-   #### SignIn callback
+
+    ```
+    const handler = NextAuth({
+        providers: [],
+        callbacks: {
+            signIn: ({user}) {
+                if(user.email === "malicioususer@gmail.com") 
+                {
+
+                    // don't allow user to authenticate
+
+                    return false;
+                }
+                return true;
+            }
+        }
+    })
+    ```
+    When using the `Credentials Provider` the `user` object is the response returned from the authorize callback and the profile object is the raw body of the HTTP POST submission.
+
+
+- #### jwt callback
+
+    This callback is called when the JWT is created (i.e, at signIn) or updated. The returned value will be encrypted and stored inside the cookie.
+
+    Here we can add any extra thing in the token if we want or, we can manipulate the token
+    
+    We can persist data like user id here. When we return `id` from authorize function then it puts the `id` in the variable `sub`, we can verify it by logging the `token` in jwt callback
+
+    ```
+    async authorize(credentials, req) {
+
+        return {
+            id: 1,
+            name: "Ritik",
+            email: "raj@gmail.com"
+        }
+    },
+    callbacks: {
+            signIn: ({user}) {
+                if(user.email === "malicioususer@gmail.com") 
+                {
+                    // don't allow user to authenticate
+                    
+                    return false;
+                }
+                return true;
+            },
+            jwt: ({token, user}) {
+                token.userId = token.sub;
+
+                return token;
+            }
+        }
+    ```
+
+- #### session callback
+
+    This is called **whenever session is checked**. By default only a **subset of token is returned** for increased security. 
+
+    To make something available that we added in the token (like user id) via jwt callback(), we have to **explicitly forward** it here to make it available to the client. This is the reason we could not see `id` when we logged the `session` from `useSession()`
+
+
+    ```
+    async authorize(credentials, req) {
+
+        return {
+            id: 1,
+            name: "Ritik",
+            email: "raj@gmail.com"
+        }
+    },
+    callbacks: {
+            signIn: ({user}) {
+                if(user.email === "malicioususer@gmail.com") 
+                {
+                    // don't allow user to authenticate
+                    
+                    return false;
+                }
+                return true;
+            },
+            jwt: ({token, user}) {
+                token.userId = token.sub;
+
+                return token;
+            }
+            session: ({session, token, user}) {
+                session.user.id = token.userID;
+
+                return session;
+            }
+        }
+    ```
+
+    Now, after we provided id in the session callback,  we can see it in the client component when we access `session` from `useSession()` hook. But, we it's not available in the server component when we access it using `getServerSession()` function.
+
+    Fo this, we need to provide NextAuth `authOptions` as an argument to the `getServerSession()` function. And then it will show the `id`
+
+    **authOptions:** 
+        
+    It is basically the object that we put inside `NextAuth` above. (all the providers, authorze function, callbacks)
+
+    Put this authOption into a different file and import it wherever it is required.
+
+
+### Custom Signin Page
+
+We can create signin route just like any route inside app,  and create a page there with our own custom signin page.
+
+But still when we call `signIn()` taht we get from `next-auth/react` still it will take us to `/api/auth/signin`. To avoid this, we have add another key in `authOptions` called pages.
+
+```
+{
+    providers: [],
+    callbacks: {},
+    pages: {
+        signIn: "/signin"
+    }
+}
+```
+
+Now inside our custom `signin` page let's say we have abutton which authneticate using google, then we have to call `signIn("google")` when button is clicked. Basically, we have to call `signIn` function with the `provider` which we want to use.
+
+I we want to use `credentials provider` then we will do:
+
+```
+signIn({"credentials", {
+    name: "efwef",
+    password: "ewrewgrg"
+}})
+
+```
