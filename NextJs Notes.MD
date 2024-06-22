@@ -240,6 +240,120 @@ In Whatever route you feel it will take time to load a component, you can create
 
 And that's it, it will automatically show the loading state when a component is taking time to be displayed.
 
+### File Conventions
+
+Next.js provides a set of special files to create UI with specific behavior in nested routes:
+
+Files                   | Behavour                |  
+|-----------------------|-------------------------|
+layout	                | Shared UI for a segment and its children |
+page	                | Unique UI of a route and make routes publicly accessible
+loading	                | Loading UI for a segment and its children
+not-found	            | Not found UI for a segment and its children
+error	                | Error UI for a segment and its children
+global-error	        | Global Error UI
+route	                | Server-side API endpoint
+template	            | Specialized re-rendered Layout UI
+default	                | Fallback UI for Parallel Routes
+
+
+### Root Layout (Required)
+
+The root layout is defined at the top level of the app directory and applies to all routes. This layout is required and must contain html and body tags, allowing you to modify the initial HTML returned from the server.
+
+### Navigation
+
+1. #### `useRouter()` hook
+
+    The useRouter hook allows you to programmatically change routes from Client Components.
+
+    ```
+    'use client'
+    
+    import { useRouter } from 'next/navigation'
+    
+    export default function Page() {
+    const router = useRouter()
+    
+    return (
+        <button type="button" onClick={() => router.push('/dashboard')}>
+        Dashboard
+        </button>
+    )
+    }
+    ```
+
+2. #### `redirect` function
+
+    For Server Components, use the redirect function instead.
+
+    ```
+    import { redirect } from 'next/navigation'
+    
+    async function fetchTeam(id: string) {
+        const res = await fetch('https://...')
+        if (!res.ok) return undefined
+        return res.json()
+    }
+    
+    export default async function Profile(
+        { params }: { params: { id: string } }) {
+        const team = await fetchTeam(params.id)
+            if (!team) {
+                redirect('/login')
+            }
+        }
+    
+    // ...
+    ```
+
+### Dynamic Routes (including the params in the route)
+
+Convention
+A Dynamic Segment can be created by wrapping a folder's name in square brackets: `[folderName]`. 
+
+For example, `[id]` or `[slug]`.
+
+For example, a blog could include the following route `app/blog/[id]/page.js`
+
+```
+export default function Page({ params }) {
+  return <div>My Post: {params.slug}</div>
+}
+```
+
+Route	                        | Example URL	            | params
+--------------------------------|---------------------------|------------------
+app/blog/[slug]/page.js	        | /blog/a	                | { slug: 'a' }
+
+---
+
+
+
+## Excluding a folder from acting as Route
+
+Any folder we create inside `app` will be considered as route path
+
+Let's say we have a folder `home` inside `app` then if there is a `page.js` inside this `home` folder, then we can access it like `/home`.
+
+To avoid `home` to be accessible, prefix the folder name with underscore `_home`
+
+
+### Catch all handler route
+
+let's say we want to catch routes like this `/course/anything/anything`
+
+i.e., after `/course` doesn't matter what comes, I want to catch that
+
+For this the route folder structure will be:
+
+- app
+    - course
+        - [...courseID]
+            - page.jsx
+
+Now, we can extract that path after course, using the `params`, that the handler in the page.jsx receives.
+
 
 ## API routes in NextJs
 
