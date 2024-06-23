@@ -608,6 +608,8 @@ This basically is helpful when we need to do extra operation in these steps.
 
 - #### jwt callback
 
+    Requests to /api/auth/signin, /api/auth/session and calls to getSession(), getServerSession(), useSession() will invoke this function, but only if you are using a JWT session.
+
     This callback is called when the JWT is created (i.e, at signIn) or updated. The returned value will be encrypted and stored inside the cookie.
 
     Here we can add any extra thing in the token if we want or, we can manipulate the token
@@ -709,7 +711,7 @@ But still when we call `signIn()` taht we get from `next-auth/react` still it wi
 
 Now inside our custom `signin` page let's say we have abutton which authneticate using google, then we have to call `signIn("google")` when button is clicked. Basically, we have to call `signIn` function with the `provider` which we want to use.
 
-I we want to use `credentials provider` then we will do:
+If we want to use `credentials provider` then we will do:
 
 ```
 signIn({"credentials", {
@@ -717,4 +719,22 @@ signIn({"credentials", {
     password: "ewrewgrg"
 }})
 
+```
+
+we can also get result from this signIn function:
+
+In the authorization option, we can throw error if user is not found and that error comes as a response to signIn function.
+But, we need to use   ` redirect: false` when calling signIn, else it will redirect to error page.
+
+```
+const res = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+        });
+if (!res?.ok) {
+    return toast.error(res?.error as string);
+}
+toast.success("User logged in.")
+router.push("/");
 ```
