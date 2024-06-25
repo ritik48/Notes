@@ -83,6 +83,8 @@ a.unshift('hey')
 output - ['hey', 'wef', 'wewef']
 ```
 
+
+
 let a=['a','b']
 let b=['c','d']
 let d=a.concat(b) ['a','b', 'c','d']
@@ -98,6 +100,8 @@ a.slice(1) -> ['b'] creates a copy
 SPLICE -> changes original array
 
 a.splice(start, number of items to delete, values to insert)
+
+
 
 a.splice(1, 0, 'c') -> ['a','c','b']
 a.splice(0,1) -> ['c','b']
