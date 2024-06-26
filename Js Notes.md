@@ -170,8 +170,6 @@ let even = nums.map((el) => {
 })
 
 console.log(even) => [2,4]
-
-
 */
 
 /*
