@@ -132,7 +132,7 @@ a.100 -> wrong
 a.number = 90 -> modifies the object
 
 
----------------- For Loops
+### ---------------- For Loops
 
 for(let i=0;i<=10;i++){
     console.log(i);
