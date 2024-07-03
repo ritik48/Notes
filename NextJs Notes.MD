@@ -30,7 +30,8 @@ It was introduced because of some inconviniences in React
 ![alt text](image-3.png)
 
 
-**Downsides :**
+
+*Downsides :*
 
 1.  Can't be distributed via a CDN, always needs a server running that does `server side rendering` and hence is expensive
 
