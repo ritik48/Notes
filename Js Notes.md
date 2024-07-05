@@ -212,7 +212,7 @@ const sum = (x,y) => x+y;
 
 /*
 
-------------- SET TIMEOUT -------------
+**------------- SET TIMEOUT -------------**
 
 
 setTimeout(() => {
@@ -221,7 +221,7 @@ setTimeout(() => {
 
 output -> prints 'hello' after 3 seconds
 
--------------- SET INTERVAL -------------
+**-------------- SET INTERVAL -------------**
 
 repeat something in a fixed interval
 
