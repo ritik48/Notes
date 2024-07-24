@@ -101,8 +101,6 @@ SPLICE -> changes original array
 
 a.splice(start, number of items to delete, values to insert)
 
-
-
 a.splice(1, 0, 'c') -> ['a','c','b']
 a.splice(0,1) -> ['c','b']
 
