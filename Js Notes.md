@@ -27,8 +27,6 @@
 
 `Math.floor( Math.random() * 5) + 1` -> random number from 1 to 5
 
-
-
 `==` -> check for equality of value, not equality of type
 
 converts both value to same type then compares
