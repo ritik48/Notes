@@ -283,9 +283,7 @@ const btn = document.querySelector('button')
 btn.onclick = function () {
     console.log('clicked')
 }
-
 -- btn.onmouseenter = () {console.log('touched')}
-
 
 ----------------- Event Listeners ----------------
 
