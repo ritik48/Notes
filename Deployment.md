@@ -104,7 +104,150 @@ When you configure `server_name _`; in Nginx, it means that the server block wil
 
 **Any IP Address:** It also means that any request made directly to the IP address of your EC2 instance will be accepted. For example, accessing http://<EC2_IP>/ will work even without a domain name pointing to the server.
 
-      
-
 [Important Chatgpt Notes](https://chatgpt.com/share/477c7fad-c02f-4e25-8bdd-4a4926cbd644)
+
+---
+
+Above we setup the server block in the `nginx.conf`, but we can also use sites-enabled and sites-available folder that is present inside the directory /etc/nginx to configure different servers.
+
+### Complete step hosting a MERN app.
+
+We have domain: `example.com`
+
+let's say we have frontend code in `/usr/frontend` and backend in `/usr/backend`
+
+1. First we will `build` our react app.
+
+   ```
+   cd /usr/frontend
+   npm run build
+   ```
+
+   This will generate a build folder having all the files required to run the app.
+   
+   Now, we will serve this using nginx
+
+2. Setup server block in `/etc/nginx/sites-available`
+   
+   currently here we have a file default, it has a sevrer block that serves a default page on port 80
+   
+   so we will remove it, and create a file with any name, but convention is to use domain name (example.com)
+
+   now, in `example.com`
+
+   ```
+   server {
+           listen 80;
+           server_name example.com www.example.com;
+          
+           root /usr/frontend/build # this build will be served when domain example.com or www.example.com is visited
+           
+           index index.html;
+
+           location / {
+                try_files $uri ./index.html
+           }
+   }
+   ```
+   In the above server block, we have a location block which specifie what will happen when `/` route is hit. Here, we give two option `$uri` or `./index.html`
+   
+   If our url is `http://examp.com/about`, then here `$uri` is `/about.html`
+   
+   `location` block will first try to find if we have `about` file. if not then it will just serve `index.html`
+   
+   Serving `index.html` here is crucial for our react app, as the routing in our react is done using react-browser router, there is no actual navigation it's just that react-browser-router changes the component based on url provided.
+
+   The setup will serve frontend.
+
+   Now, in our frontend we will be having api calls to nodejs backend, so we have to specify here how to handle that.
+   
+   Let's say from frontend we make request to backend `http://localhost:3000/api`
+
+   Now, we need a way to differentiate which request is backend and which frontend.
+
+   Let's have a convention, if url has `/api` appended to it it means the requets needs to go to the backend.
+   
+   So, we will setup a server block which will proxy the request to this backend endpoint when `/api` route is visited.
+
+   So, we will have one more `location` block.
+
+   Complete code:
+
+   ```
+   server {
+           listen 80;
+           server_name example.com www.example.com;
+          
+           root /usr/frontend/build # this build will be served when domain example.com or www.example.com is visited
+           
+           index index.html;
+
+           location / {
+                try_files $uri ./index.html
+           }
+           location /api {
+                proxy_pass: http://localhost:3000  (backend endpoint)
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+           }
+   }
+   ```
+   So, now when we hit `example.com/api/projects`, it will proxy the request to `http://localhost:3000` and the resulting url will be `http://localhost:3000/api/projects`
+
+  3. Setup `site-enabled` folder in `/etc/nginx/`
+
+     This directory contains symbolic links to the configuration files in sites-available that you want to enable.
+     
+     **Why Symbolic Links?:** 
+    
+     Instead of copying configuration files from sites-available to sites-enabled, Nginx uses symbolic links. This makes it easier to enable or disable sites by simply adding or removing     these links, without modifying the actual configuration files.
+
+     ***Only the configurations that have symbolic links in sites-enabled will be used by Nginx.***
+
+     So, to setup symbolic links for the websites defined in the `sites-available`, run the following command.
+
+     `sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/`
+
+     Now, save the file and test the nginx status.
+
+     `sudo nginx -t`
+
+     if there are errors, then reload the nginx server
+
+     `sudo nginx -s reload`
+
+     So, our frontend is ready.
+
+     Now, we will start our backend.
+
+4. Start the backend
+
+   To start a backend and keep it running we will use process manager `pm2`
+
+   Install:
+
+   `npm i -g pm2`
+
+   now, inside the backend directory
+
+   `pm2 start npm --name "backend" run dev`
+
+    Explanation:
+    pm2 start: This tells PM2 to start a new process.
+
+    npm: PM2 is running the npm command.
+
+    --name "backend": This gives the PM2 process a name (backend) to identify it easily in the list of PM2 processes. It’s important to put the name in quotes if it contains spaces or special characters.
+
+    --: The -- is used to pass arguments to the command (npm in this case). It tells PM2 that any following arguments should be passed to npm, not to pm2 itself.
+
+    run dev: This is the npm command to run the dev script from your package.json.
+
+   
+
+
+     
 
