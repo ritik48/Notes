@@ -2428,3 +2428,107 @@ useEffect(() => {
 
 This load, will store the result in `fetcher.data` and we also get the current state by `fetcher.state` which can be `idle`, `submitting`, `loading`
 
+---
+
+## Performance Optimization
+
+## Code Splitting
+
+It's done to reduce the bundle size. We split code so that only the required chunk is loaded. 
+
+Let's say we have three links in our React App:
+- Home
+- About
+- Login
+
+Now if we dont use code splitting then the js bundle will contains the code for all these page. Like, when we cisit home page we still will be having the code for the `about` and `login`, even though we didn't visit it yet. This leads to wastage of bandwidt and slow performance.
+
+#### Fix:
+
+We can use lazy loading in react. React provides `lazy()` function which we can use to import the modules. And these modules will only be downloaded when it's actually used in our code.
+
+Example code:
+
+```
+const Profile = lazy(() => import("./components/Profile"))
+
+const App = () => {
+  const [show, setShow] = useState(false);
+
+  return (
+    <div>
+      <button onClick{() => setShow((pre) => !pre)}>
+         {show ? "Hide": "Show"}
+      </button>
+      {show && 
+        <Suspense fallback={"Loading..."}>
+           <Profile />
+        </Suspense>
+      }
+    </div>
+  )
+}
+```
+
+How it works:
+
+- import("./components/Profile") downloads the module. It returns a Promise.
+
+- React.lazy wraps this import and tells React to suspend rendering until the Promise resolves.
+
+- Suspense allows you to show a fallback UI while the component is downloading.
+
+- Initially, the Profile component’s code is not downloaded. It downloads only when show is true.
+
+
+## Preloading
+
+- Preloading is the process of loading a resource immediately, because we know it will be needed soon.
+
+- Useful when we want to avoid the fallback UI in lazy loading.
+
+For example, we can preload the Profile component when the user hovers on the “Show” button.
+
+
+How it works:
+
+```
+const Profile = lazy(() => import("./components/Profile"));
+
+const preloadProfile = () => import("./components/Profile");
+
+<button
+  onMouseEnter={preloadProfile} // preloads the code when hovered
+  onClick={() => setShow((prev) => !prev)}
+>
+  {show ? "Hide" : "Show"}
+</button>
+```
+
+What happens:
+
+- import() downloads the module and returns a Promise.
+
+- React.lazy will use the cached module when the component is rendered.
+
+- User doesn’t see the “Loading…” fallback because the module is already downloaded.
+
+
+By default, the lazy() always expects the promise resolving to a object having default export.
+
+Let's say in the `Profile.tsx`, we have multiple one named export and a defautl export.
+
+- export ProfilieImage;
+- export default Profile;
+
+Now, we cannot download individula components separately, the import() download the entire file.
+
+So, we can lazyload both like this.
+```
+const ProfileImage = lazy(() => import("./components/Prile").then((res) => ({defaut: res.ProfileImage})))
+
+const Profile = lazy(() => import(("./components/Profile")))
+```
+
+
+
