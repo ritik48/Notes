@@ -6,9 +6,25 @@ A docker image is a template which contains set of instructions which will be us
 
 An image is composed of multiple stacked layers, like layers in a photo editor, each changing something in the environment. Images contain the code or binary, runtimes, dependencies, and other filesystem objects to run an application.
 
-### what is a Container ?
+### What is a Container ?
 
 A container is a running instance of an image. It is a lightweight, standalone, executable package that includes everything needed to run a piece of software, including the code, runtime, system tools, system libraries, and settings.
+
+### What is a Docker Registry ?
+
+It is a storage like github where we can pusha nd pull the docker images.
+Dockerhub: Official Default Docker Registry https://hub.docker.com
+AWS ECR: AWS Registry for images
+Artifact Registry: Googles Registry for images
+
+
+### Docker Engine
+
+It consists of following components:
+
+- Docker Cli - this is where the docker commands are executed
+- Docker API - acts as a messanger between docker cli and docker daemon
+- Docker Daemon - manages images , containers and resources
 
 ---
 
@@ -44,23 +60,74 @@ CMD ["node", "index.js"] -> this runs when we start the container
 
     `docker images`
 
-4. Start a container from an image
+4. Create Container from image
+    This creates a new container from this image.
+    `docker create image_name`
 
+5. Start a container from an image  
+    Run command pulls the image if it does not exist locally, and then created a new container from it and start it.
     `docker run image_name`
 
-5. Port mapping: forward the request coming on a particular port on your machine to a port exposed in the container
+6. Only pulls the image and not start the container
+    `docker pull image_name`
+
+7. Start an existing container
+
+    `docker start container_name/id`
+
+8. Port mapping: forward the request coming on a particular port on your machine to a port exposed in the container
 
     `docker run -p 3000:3000 image_name`
 
     here, the request that will come on port 3000 on your windows will be forward to port 3000 open in your container
 
-6. Stop a container
+9. Stop a container
 
     `docker stop container_id`
 
-7. We can also give names to conatainer
+10. We can also give names to conatainer
 
     `docker run -p 3000:3000 --name container_name image_name`
+
+11. Run the cotainer in detached mode
+
+    `docker run -d container_name`
+
+12. Add Container Name
+
+    `docker run --name my_nginx nginx`
+
+13. Delete a container
+
+    `docker rm container_name/id`
+
+14. See Container Logs
+
+    `docker logs container_name/id`
+    This displays log that was present at this moment of command execution. It's not live.
+
+    To get live logs:
+    `docker logs -f container_name/id`
+
+15. Execute commands inside the container/go inside the container
+
+    `docker exec -it container_name/id bash`
+    This commands executes `bash` command inside this container in the interactive mode.
+
+16. Remove all the stopped containers and images
+    `docker container prune`
+    `docker image prune`
+
+### Docker Image Tags
+
+Tags are used to identify different versions of an image
+Representation: image_name:tag
+
+e.g., `nginx:latest`, `redis:7`
+
+By default images are tagged as `latest`, and the docker `pull` command also pulls the `latest` tag by default
+
+---
 
 Exch step in the dockerfile is basically termed as layer.
 If any layer change, then all the layer from that to the end will not use cached version of the previous build, instead will start fresh.
