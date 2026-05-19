@@ -129,8 +129,26 @@ By default images are tagged as `latest`, and the docker `pull` command also pul
 
 ---
 
+### Layers in Dockerfile
+
 Exch step in the dockerfile is basically termed as layer.
 If any layer change, then all the layer from that to the end will not use cached version of the previous build, instead will start fresh.
+
+
+Dockerfile
+```
+FROM node:20
+
+WORKDIR usr/src/app
+
+COPY . .
+
+RUN npm install
+
+EXPOSE 3000
+
+CMD ["node", "index.js"]
+```
 
 #### Why layers ?
 
@@ -166,6 +184,65 @@ EXPOSE 3000
 
 CMD ["node", "index.js"]
 ```
+>Note:*<br>
+**RUN:** This is executed during image build.
+<br>**CMD:** This represents the default command that will be executed when the container starts.
+
+### Build the image
+
+`docker build -t image_name .`
+
+#### Tag name (-t): 
+It is used to add name to the image
+like image_name:tag. If we don't specify the tag then it takes `latest` be default
+
+#### Build Context (.):
+It means the current directory which docker uses as the **build context.**
+When building, Docker needs access to files like:
+
+- package.json
+- source code
+- images
+- configs
+
+The build context is the folder Docker can access during build.
+
+Internally Docker:
+- Sends current directory to Docker daemon
+- Reads the Dockerfile
+- Executes instructions one by one
+- Creates image layers
+- Produces final image
+
+
+But if you wnat to push the image to dockerhub then the imgae name should be in this format: `dockerhub_username/image_name`
+
+example: `docker build -t ritik/sample_app .`
+
+---
+
+### Pass Environment variables to the the container
+
+- manually passing:
+
+    Flag: `-e`
+
+    `docker run -e port=4000 backend`
+
+- using .env file:
+
+    When you have a lot of environment variables then its not possible to pass them via command line. Instead we can have `.env` file and then use the following command to pass it to the container.
+    <br>`docker run --env-file .env backend`
+
+**Debug env:** 
+How to check if your envs are crrectly set in the container.
+
+- `docker exec -it container_name printenv`
+<br>This executes `printenv` command inside the container and all the envs are displayed.
+To display a particular env use `printenv env_name`
+
+> *Note:* We can use both `-e` and `--env-file` together. And `-e` will overrde the variables if they are also present in the env file
+
 
 ---
 
@@ -236,6 +313,90 @@ To pass the environment variables inside container, we can use `-e` tag followed
 ---
 
 ### Multi-stage builds
+
+A multi-stage build in Docker means using multiple FROM statements in one Dockerfile to make the final image:
+
+- smaller
+- cleaner
+- more secure
+
+#### The Problem Without Multi-Stage Builds
+
+Suppose you have a Node.js app.
+
+To build it, you may need:
+
+- npm
+- TypeScript
+- dev dependencies
+- build tools
+
+But in production, you only need:
+
+- compiled app
+- production dependencies
+
+Without multi-stage builds, all build tools remain inside the final image → image becomes large.
+
+Example: **Normal Build (Single Stage)**
+
+```
+FROM node:22
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+RUN npm run build
+
+CMD ["node", "dist/index.js"]
+```
+
+Problem:
+
+- contains dev dependencies
+- build cache
+- TypeScript
+- unnecessary files
+
+**Multi Stage Version**
+
+```
+# Stage 1 - Build Stage
+FROM node:22 AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+
+# Stage 2 - Production Stage
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install --omit=dev
+
+COPY --from=builder /app/dist ./dist
+
+CMD ["node", "dist/index.js"]
+```
+
+When we do: `Docker build` then, Docker builds all stages and the last stage becomes the final image automatically.
+
+- Only the final stage becomes the produced image.
+- Intermediate stages are temporary build stages.
+
+**Another Example use case:**
 
 Let's say we we want to run different command when container starts, like
 
@@ -370,7 +531,7 @@ docker-compose.yaml
 
 `docker-compose up`
 
-When we run docker-compose, it `automatically creates a network`, and therefore all the services are connected to each othe, means they can communicate with each other. And the containers can be referenced by their name, here `mongodb_db`, `my-app`
+When we run docker-compose, it `automatically creates a network`, and therefore all the services are connected to each other, means they can communicate with each other. And the containers can be referenced by their name, here `mongodb_db`, `my-app`
 
 So, if I want my-app to cnnect with the mongodb, the url will be
 
