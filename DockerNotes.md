@@ -17,7 +17,6 @@ Dockerhub: Official Default Docker Registry https://hub.docker.com
 AWS ECR: AWS Registry for images
 Artifact Registry: Googles Registry for images
 
-
 ### Docker Engine
 
 It consists of following components:
@@ -50,40 +49,40 @@ CMD ["node", "index.js"] -> this runs when we start the container
 
 1. Create an image from this docker file
 
-    `docker build . -t test_app`
+   `docker build . -t test_app`
 
 2. Display all running containers
 
-    `docker ps`
+   `docker ps`
 
 3. Display all images
 
-    `docker images`
+   `docker images`
 
 4. Create Container from image
-    This creates a new container from this image.
-    `docker create image_name`
+   This creates a new container from this image.
+   `docker create image_name`
 
 5. Start a container from an image  
-    Run command pulls the image if it does not exist locally, and then created a new container from it and start it.
-    `docker run image_name`
+   Run command pulls the image if it does not exist locally, and then created a new container from it and start it.
+   `docker run image_name`
 
 6. Only pulls the image and not start the container
-    `docker pull image_name`
+   `docker pull image_name`
 
 7. Start an existing container
 
-    `docker start container_name/id`
+   `docker start container_name/id`
 
 8. Port mapping: forward the request coming on a particular port on your machine to a port exposed in the container
 
-    `docker run -p 3000:3000 image_name`
+   `docker run -p 3000:3000 image_name`
 
-    here, the request that will come on port 3000 on your windows will be forward to port 3000 open in your container
+   here, the request that will come on port 3000 on your windows will be forward to port 3000 open in your container
 
 9. Stop a container
 
-    `docker stop container_id`
+   `docker stop container_id`
 
 10. We can also give names to conatainer
 
@@ -134,8 +133,8 @@ By default images are tagged as `latest`, and the docker `pull` command also pul
 Exch step in the dockerfile is basically termed as layer.
 If any layer change, then all the layer from that to the end will not use cached version of the previous build, instead will start fresh.
 
-
 Dockerfile
+
 ```
 FROM node:20
 
@@ -152,9 +151,9 @@ CMD ["node", "index.js"]
 
 #### Why layers ?
 
--   Caching
--   Re-using layers
--   Faster Build time
+- Caching
+- Re-using layers
+- Faster Build time
 
 When we do docker build to create an image, then some files get downloaded like base image from whcih we are creating and further the steps that we have written in the dockerfile.
 
@@ -184,19 +183,22 @@ EXPOSE 3000
 
 CMD ["node", "index.js"]
 ```
->Note:*<br>
-**RUN:** This is executed during image build.
-<br>**CMD:** This represents the default command that will be executed when the container starts.
+
+> Note:\*<br>
+> **RUN:** This is executed during image build.
+> <br>**CMD:** This represents the default command that will be executed when the container starts.
 
 ### Build the image
 
 `docker build -t image_name .`
 
-#### Tag name (-t): 
+#### Tag name (-t):
+
 It is used to add name to the image
 like image_name:tag. If we don't specify the tag then it takes `latest` be default
 
 #### Build Context (.):
+
 It means the current directory which docker uses as the **build context.**
 When building, Docker needs access to files like:
 
@@ -208,12 +210,12 @@ When building, Docker needs access to files like:
 The build context is the folder Docker can access during build.
 
 Internally Docker:
+
 - Sends current directory to Docker daemon
 - Reads the Dockerfile
 - Executes instructions one by one
 - Creates image layers
 - Produces final image
-
 
 But if you wnat to push the image to dockerhub then the imgae name should be in this format: `dockerhub_username/image_name`
 
@@ -225,24 +227,23 @@ example: `docker build -t ritik/sample_app .`
 
 - manually passing:
 
-    Flag: `-e`
+  Flag: `-e`
 
-    `docker run -e port=4000 backend`
+  `docker run -e port=4000 backend`
 
 - using .env file:
 
-    When you have a lot of environment variables then its not possible to pass them via command line. Instead we can have `.env` file and then use the following command to pass it to the container.
-    <br>`docker run --env-file .env backend`
+  When you have a lot of environment variables then its not possible to pass them via command line. Instead we can have `.env` file and then use the following command to pass it to the container.
+  <br>`docker run --env-file .env backend`
 
-**Debug env:** 
+**Debug env:**
 How to check if your envs are crrectly set in the container.
 
 - `docker exec -it container_name printenv`
-<br>This executes `printenv` command inside the container and all the envs are displayed.
-To display a particular env use `printenv env_name`
+  <br>This executes `printenv` command inside the container and all the envs are displayed.
+  To display a particular env use `printenv env_name`
 
-> *Note:* We can use both `-e` and `--env-file` together. And `-e` will overrde the variables if they are also present in the env file
-
+> _Note:_ We can use both `-e` and `--env-file` together. And `-e` will overrde the variables if they are also present in the env file
 
 ---
 
@@ -250,8 +251,8 @@ To display a particular env use `printenv env_name`
 
 ### Volumes
 
--   Used to persists data across starts
--   specifically usefull for things like database
+- Used to persists data across starts
+- specifically usefull for things like database
 
 we first create the volume
 
@@ -274,25 +275,25 @@ Let's say we have an express server running inside container A, and a mongo serv
 
 #### Commands
 
--   To display available networks
+- To display available networks
 
-    `docker network ls`
+  `docker network ls`
 
--   First, create a network
+- First, create a network
 
-    `docker network create my_network`
+  `docker network create my_network`
 
--   Attach network to a container (express server)
+- Attach network to a container (express server)
 
-    `docker run -p 3000:3000 --network network_name image_name`
+  `docker run -p 3000:3000 --network network_name image_name`
 
--   Attach mongo container also to the same network, we will also give the mongo container a name so that we can use it to communicate with this container from express server running on the same network
+- Attach mongo container also to the same network, we will also give the mongo container a name so that we can use it to communicate with this container from express server running on the same network
 
-    `docker run -p 27017:27017 --name mongo_container --network network_name mongo`
+  `docker run -p 27017:27017 --name mongo_container --network network_name mongo`
 
--   Now, in express server we will use the following url to connect to the mongodb server running in the container
+- Now, in express server we will use the following url to connect to the mongodb server running in the container
 
-    `mongoose.connect("mongodb://mongo_container:27017/my_db")`
+  `mongoose.connect("mongodb://mongo_container:27017/my_db")`
 
 ---
 
@@ -430,49 +431,49 @@ Here, we are creating 3 images. Only, image 2 and 3 use image 1 as their base im
 
 **Explaination of above dockerfile.**
 
--   `FROM node:20 AS base: `
+- `FROM node:20 AS base: `
 
-    This line specifies the base image for the Docker container. In this case, it's a Node.js image version 20. It sets up the base environment for the subsequent instructions.
+  This line specifies the base image for the Docker container. In this case, it's a Node.js image version 20. It sets up the base environment for the subsequent instructions.
 
--   `WORKDIR /user/src/app: `
+- `WORKDIR /user/src/app: `
 
-    This sets the working directory inside the Docker container to /user/src/app. This is where the application code and files will be copied and where subsequent commands will be executed.
+  This sets the working directory inside the Docker container to /user/src/app. This is where the application code and files will be copied and where subsequent commands will be executed.
 
--   `*COPY package.json .**:`
+- `*COPY package.json .**:`
 
-    This instruction copies the package.json and package-lock.json (if it exists) from the local file system into the /user/src/app directory in the Docker container. These files are needed for npm to install dependencies.
+  This instruction copies the package.json and package-lock.json (if it exists) from the local file system into the /user/src/app directory in the Docker container. These files are needed for npm to install dependencies.
 
--   `RUN npm install: `
+- `RUN npm install: `
 
-    This command installs the dependencies listed in the package.json file into the Docker container. It's executed within the /user/src/app directory.
+  This command installs the dependencies listed in the package.json file into the Docker container. It's executed within the /user/src/app directory.
 
--   `FROM base AS development:`
+- `FROM base AS development:`
 
-    This line creates a new stage in the Dockerfile based on the base stage. This is called a multi-stage build. It allows you to separate build-time dependencies from runtime dependencies, reducing the size of the final Docker image.
+  This line creates a new stage in the Dockerfile based on the base stage. This is called a multi-stage build. It allows you to separate build-time dependencies from runtime dependencies, reducing the size of the final Docker image.
 
--   `COPY . .: `
+- `COPY . .: `
 
-    This instruction copies all files from the current directory (presumably the application code) into the Docker container's /user/src/app directory.
+  This instruction copies all files from the current directory (presumably the application code) into the Docker container's /user/src/app directory.
 
--   `CMD ["nodemon", "index.js"]: `
+- `CMD ["nodemon", "index.js"]: `
 
-    This sets the default command to run when the container starts in development mode. It uses nodemon to watch for changes in the files and automatically restart the Node.js application when changes are detected.
+  This sets the default command to run when the container starts in development mode. It uses nodemon to watch for changes in the files and automatically restart the Node.js application when changes are detected.
 
--   `FROM base AS production: `
+- `FROM base AS production: `
 
-    This creates another stage in the Dockerfile based on the base stage.
+  This creates another stage in the Dockerfile based on the base stage.
 
--   `COPY . .: `
+- `COPY . .: `
 
-    Similar to the development stage, this instruction copies all files from the current directory into the Docker container's /user/src/app directory.
+  Similar to the development stage, this instruction copies all files from the current directory into the Docker container's /user/src/app directory.
 
--   `RUN npm prune --development:`
+- `RUN npm prune --development:`
 
-    This command removes development dependencies from the node_modules directory. It's done to reduce the size of the production image since development dependencies are not needed in the production environment.
+  This command removes development dependencies from the node_modules directory. It's done to reduce the size of the production image since development dependencies are not needed in the production environment.
 
--   `CMD ["node", "index.js"]:`
+- `CMD ["node", "index.js"]:`
 
-    This sets the default command to run when the container starts in production mode. It runs the Node.js application directly without any watching mechanism like nodemon, which is suitable for production environments.
+  This sets the default command to run when the container starts in production mode. It runs the Node.js application directly without any watching mechanism like nodemon, which is suitable for production environments.
 
 Now, to create an image from a aprticular stage, we use `--target stage_name` with the build command.
 
@@ -507,7 +508,9 @@ it mounts `. (current directory locally)` to `"/usr/src/app" (directory in conta
 
 ### Docker Compose
 
-A project has a lot of auxillary dependency it needs to use like mongodb/kafka/redis ... , this requires us to run multiple docker commands. So, we have to start multiple terminals and execute different commands, but this approach is not efficient and prone to errors. 
+`docker-compse.yml`
+
+A project has a lot of auxillary dependency it needs to use like mongodb/kafka/redis ... , this requires us to run multiple docker commands. So, we have to start multiple terminals and execute different commands, but this approach is not efficient and prone to errors.
 
 Instead, we can use `Docker Compose` to manage and run all the required services with a single command, simplifying the process and ensuring that all dependencies are correctly configured and started together.
 
@@ -515,13 +518,12 @@ Compose is a tool used for defining and **running muti-container** Docker Applic
 
 docker-compose.yaml
 
-
     services:
         mongodb_db:
             image: mongo:latest
             ports:
                 - 27017:27017
-    
+
         my-app:
             build: ./
             ports:
@@ -545,7 +547,6 @@ e.g,
 
 docker-compose.yaml
 
-
     services:
         mongodb_db:
             image: mongo:latest
@@ -553,11 +554,80 @@ docker-compose.yaml
                 - 27017:27017
             volumes:
                 - mongo_volume:/data/db
-    
+
         my-app:
             build: ./
+            image: rtk_image
             ports:
                 - 3000:3000
     volumes:
         mongo_volume:
 
+#### Commands:
+
+`docker compose up`
+
+This command pulls the image or build the image if not already present and then start the container.
+
+>***Note:*** it recreates the container only when there is a chnage in the doker-compose file else it will just use the existing container. Let's say when the container was running, you did ctrl+c, this just stops the container and not remove it. Therefore, when you do `docker compose up` after a code chnage that won't be reflected. For that you have to run `docker compose up --build`
+
+`docker compose up -d`: to run in detached mode
+
+`docker compose up --build`: Builds the images and then start the container
+
+`docker compose down`: removes all the containers
+
+`docker compose restart`: restarts the container
+
+`docker compose ps`: displays the running compose containers
+
+`docker compose ps -a`: displays all the compose containers
+
+`docker compose logs`: check the logs at the moment this command runs when containers are running in detached mode
+
+`docker compose logs -f`: checkt the live logs
+
+`docker compose logs service_name`: check the logs of a particular service (name defined in the docker compose file)
+
+
+**Adding environment variables**:
+
+There are two ways to add env in compose:
+
+1. environment
+
+   ```
+    services:
+        mongodb_db:
+            image: mongo:latest
+            ports:
+                - 27017:27017
+            environment:
+                - JWT_SECRET: sample
+                - COOKIE_SECRET: sample
+   ```
+
+   Now, this is not the right way of adding env as its hardcoded in the compose file so anyone can see it. Therefore, we can use env variables. For this create an env file and then we can access it inside the compose file like below:
+
+   ```
+   services:
+     mongodb_db:
+         image: mongo:latest
+         ports:
+             - 27017:27017
+         environment:
+             - JWT_SECRET: ${JWT_SECRET}
+             - COOKIE_SECRET: ${COOKIE_SECRET}
+   ```
+
+2. env_file
+
+   ```
+   services:
+       mongodb_db:
+           image: mongo:latest
+           ports:
+               - ${HOST_PORT}:${CONTAINER_PORT}
+           env_file:
+           - ./.env
+   ```
