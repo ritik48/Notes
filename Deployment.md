@@ -34,11 +34,13 @@ With this you will be able to access the EC2 instance from your terminal. Now, y
 
 If you had setup the ports as said in the above step, you would be able to access your express app on **http://your-ec2-ip:3000**
 
-### Configuring Nginx
+## Configuring Nginx
 
-NGINX is open-source web server software used for **reverse proxy**, **load balancing**, and **caching**.
+NGINX is open-source web server software used for **reverse proxy**, **load balancing**, and **http caching**.
 
-We will be using it as reverse proxy.
+[Structured Notes](https://github.com/iam-veeramalla/nginx-zero-to-hero)
+
+We will be using it as <u>**Reverse Proxy.**</u>
 
 Currenlty, we have to specify the port while accessing our express app, but we can change this using Nginx.
 
