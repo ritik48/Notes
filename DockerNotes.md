@@ -631,3 +631,53 @@ There are two ways to add env in compose:
            env_file:
            - ./.env
    ```
+
+#### Docker ARG
+
+**ARG (Build-time variable)**
+
+Available only while building the image.
+Used to pass values to the Docker build process.
+Does not exist when the container is running.
+
+DOCKERFILE
+```
+ARG VITE_API_URL
+```
+
+To pass the value:
+
+`docker build --build-arg VITE_API_URL=/api .`
+
+WITH COMPOSE:
+
+```
+build:
+  context: ./frontend
+  args:
+    VITE_API_URL: /api
+```
+
+
+ENV (Runtime environment variable)
+
+Creates an environment variable inside the image/container.
+Available during RUN commands and when the container starts.
+
+**Using ARG with ENV**
+
+```
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+```
+
+What happens?
+
+1. Docker receives:
+
+    `VITE_API_URL=/api`
+2. `ARG` stores the build argument.
+3. `ENV` copies that value into an environment variable.
+
+This is helpful when dopckerize react app. When we dockerize the react then we create build for it. Now, our app might be using some env like `BACKEND_URL`, so generally we pass env while running the container lke this `docker run -e BACKEND=http://localhost:4000 froontend`, but this won't work, because the build was already created. Thats why we need to pass the env when the build is created and this is how its done.
+

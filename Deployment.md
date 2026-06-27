@@ -167,37 +167,129 @@ let's say we have frontend code in `/usr/frontend` and backend in `/usr/backend`
 
    Now, we need a way to differentiate which request is backend and which frontend.
 
-   Let's have a convention, if url has `/api` appended to it it means the requets needs to go to the backend.
-   
-   So, we will setup a server block which will proxy the request to this backend endpoint when `/api` route is visited.
+     ## Reverse Proxy using Nginx
 
-   So, we will have one more `location` block.
+     Suppose your frontend is served by Nginx and your backend is running on `http://localhost:3000`.
 
-   Complete code:
+     From the frontend, instead of making requests directly to the backend, we can make requests to:
 
-   ```
-   server {
-           listen 80;
-           server_name example.com www.example.com;
-          
-           root /usr/frontend/build # this build will be served when domain example.com or www.example.com is visited
-           
-           index index.html;
+     ```text
+     http://example.com/api/...
+     ```
 
-           location / {
-                try_files $uri ./index.html
-           }
-           location /api {
-                proxy_pass: http://localhost:3000  (backend endpoint)
-                proxy_http_version 1.1;
-                proxy_set_header Upgrade $http_upgrade;
-                proxy_set_header Connection 'upgrade';
-                proxy_set_header Host $host;
-                proxy_cache_bypass $http_upgrade;
-           }
-   }
-   ```
-   So, now when we hit `example.com/api/projects`, it will proxy the request to `http://localhost:3000` and the resulting url will be `http://localhost:3000/api/projects`
+     For example:
+
+     ```text
+     http://example.com/api/projects
+     ```
+
+     We use the convention that **any request starting with `/api/` should be forwarded to the backend**, while all other requests should serve the frontend application.
+
+     ### Nginx Configuration
+
+     ```nginx
+     server {
+     listen 80;
+     server_name example.com www.example.com;
+
+     root /usr/share/nginx/html;
+     index index.html;
+
+     # Serve the React application
+     location / {
+          try_files $uri /index.html;
+     }
+
+     # Forward API requests to the backend
+     location /api/ {
+          proxy_pass http://localhost:3000;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_set_header Host $host;
+          proxy_cache_bypass $http_upgrade;
+     }
+     }
+     ```
+
+     With the above configuration, a request to:
+
+     ```text
+     http://example.com/api/projects
+     ```
+
+     is forwarded as:
+
+     ```text
+     http://localhost:3000/api/projects
+     ```
+
+     This configuration is correct **only if your backend routes also start with `/api`**, for example:
+
+     ```js
+     app.get("/api/projects", ...)
+     ```
+
+     ---
+
+     ## When your backend does NOT have `/api` routes
+
+     Suppose your backend routes are:
+
+     ```js
+     app.get("/projects", ...)
+     ```
+
+     instead of
+
+     ```js
+     app.get("/api/projects", ...)
+     ```
+
+     Then you should add a trailing slash to `proxy_pass`:
+
+     ```nginx
+     location /api/ {
+     proxy_pass http://localhost:3000/;
+     }
+     ```
+
+     Now Nginx rewrites the request before forwarding it.
+
+     Example:
+
+     ```text
+     Incoming request:
+     http://example.com/api/projects
+
+     Matched location:
+     /api/
+
+     Remaining path:
+     projects
+
+     Forwarded request:
+     http://localhost:3000/projects
+     ```
+
+     Notice that the `/api/` prefix is removed before the request is sent to the backend.
+
+     ### Rule of Thumb
+
+     * `proxy_pass http://localhost:3000;`
+
+     * Preserves the original URI.
+     * `/api/projects` → `/api/projects`
+
+     * `proxy_pass http://localhost:3000/;`
+
+     * Replaces the matched `location` prefix with `/`.
+     * `/api/projects` → `/projects`
+
+     This small trailing slash (`/`) is one of the most important details in Nginx reverse proxy configuration because it determines whether the request URI is preserved or rewritten before being sent to the backend.
+
+
+
 
   3. Setup `site-enabled` folder in `/etc/nginx/`
 
