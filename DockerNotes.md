@@ -679,5 +679,5 @@ What happens?
 2. `ARG` stores the build argument.
 3. `ENV` copies that value into an environment variable.
 
-This is helpful when dopckerize react app. When we dockerize the react then we create build for it. Now, our app might be using some env like `BACKEND_URL`, so generally we pass env while running the container lke this `docker run -e BACKEND=http://localhost:4000 froontend`, but this won't work, because the build was already created. Thats why we need to pass the env when the build is created and this is how its done.
+This is helpful when dockerizing frontend. When we dockerize the react then we create build for it. Now, our app might be using some env like `BACKEND_URL`, so generally we pass env while running the container like this `docker run -e BACKEND=http://localhost:4000 froontend`, but this won't work, because the build was already created. Thats why we need to pass the env when the build is created and this is how its done.
 
