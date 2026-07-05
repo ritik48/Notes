@@ -105,7 +105,7 @@ A Kubernetes cluster is made up of two main parts:
 | **API Server**         | Receives all Kubernetes requests (from `kubectl` or other clients).                                  |
 | **Scheduler**          | Decides which worker node should run each Pod.                                                       |
 | **Controller Manager** | Continuously checks that the actual cluster matches the desired state (e.g., recreates failed Pods). |
-| **etcd**               | Stores the cluster's configuration and current state (a distributed key-value database).             |
+| **etcd**                | Stores the cluster's configuration and current state (a distributed key-value database).             |
 
 
 #### 2. Worker Node
@@ -603,3 +603,135 @@ secret.yaml
           ports:
             - containerPort: 80
 ```
+
+
+#### Kubernetes Ingress
+
+What is Ingress?
+
+Ingress is a Kubernetes resource that exposes HTTP/HTTPS Services to users outside the cluster. It acts as a **single entry** point for multiple Services.
+
+**Without Ingress**
+
+We can use service but this way we will have multiple loadbalancers per service. For example, in out microservice application we can have services like:
+- backend
+- frontend
+- payment
+
+So, for all this three we would need Service LoadBalancer. So, eveyones ip is different. 
+Like:
+- frontend: frontend.company.com
+- backend: backend.company.com
+- payment: payment.company.com
+
+Problems:
+- One Load Balancer per Service
+- Higher cloud costs
+- Multiple public IPs/DNS names
+- Harder to manage
+
+And this is also costly, as we would need three static ips for 3 load balancers.
+
+**With Ingress**
+
+With this we would just need one LoadBalancer, which will route the request to different routes based on the configuration we specify.
+
+```
+Internet
+    │
+    ▼
+LoadBalancer
+    │
+    ▼
+Ingress Controller
+    │
+ ┌──┴──────────┐
+ ▼             ▼
+Frontend     Backend
+Service       Service
+```
+
+Benefits:
+- One public IP
+- One domain
+- Lower cost
+- Easier routing
+
+**Ingress controller**
+
+The Ingress Controller reads the Ingress rules and performs the routing.
+
+Popular controllers:
+
+- NGINX Ingress Controller
+- Traefik
+- HAProxy
+- AWS Load Balancer Controller
+
+
+With Ingress we get different routing startegies like:
+
+1. Path-based routing
+
+    ```
+    myapp.com/          → frontend-service
+
+    myapp.com/api       → backend-service
+
+    myapp.com/admin     → admin-service
+    ```
+
+2. Host-based routing
+
+      ```
+      shop.example.com      → shop-service
+
+      api.example.com       → api-service
+
+      admin.example.com     → admin-service
+      ```
+
+**Ingress resource yaml:**
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: myapp-ingress
+
+spec:
+  rules:
+    - host: myapp.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 80
+
+          - path: /admin
+            pathType: Prefix
+            backend:
+              service:
+                name: admin-service
+                port:
+                  number: 80
+
+```
+
+Now we have to do, `kubectl apply -f ingress.yml`
+
+But, this doesn't mean it will start working. First, we need to have ingress controller installed only after that this ingress resource will be used by ingress controller and will work.
+
