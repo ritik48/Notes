@@ -47,6 +47,30 @@ Buckets:
     - Remains the same even if you stop and start an EC2 instance (when associated correctly).
     - Can be reassociated with another EC2 instance if needed.
 
+### IP (Internet Protocol)
+
+IPv4 address is made of 32 bits.
+
+eg: 192.168.0.10
+
+And each part is repesented by 8 bits.
+
+This IP is made up of:
+- **Network bits:**
+  Identifies which network the device belongs to,
+- **Host bits**
+  Identifies the device within the network.
+
+Example in this IP: 192.168.1.10
+
+192.158.1.x: Its the network address
+x=10, identifies the device
+
+So within this network, all the devices wil have the same network bits and only the host bits will change.
+
+![alt text](/images/aws1.png)
+---
+
 
 #### VPC (Virtual Private Cloud)
 
@@ -152,5 +176,235 @@ A Network ACL is a firewall for an entire subnet.
 | Stateful         | Stateless            |
 | Only allow rules | Allow and deny rules |
 
+---
+
 #### CIDR (Classless Inter-Domain Routing)
 
+Its is a way of representing IP addresses and network ranges.
+
+It's used to define network ranges for things like:
+
+- Virtual Private Clouds (VPCs) in AWS, Azure, or GCP
+- Firewalls and security groups
+- Routing tables
+- VPN configurations
+- Kubernetes networking
+- IP allowlists
+
+A CIDR notation looks like this:
+```
+192.168.1.0/24
+```
+It is made up of two parts:
+```
+<Ip-Address>/<Prefix-length>
+```
+
+1. 192.168.1.0 -> network address
+2. /24 -> the prefix length, it tells us how many bits are used for the network portion of the IP address.
+
+###### How the /24 works?
+
+An IPv4 address has 32 bits.
+```
+192.168.1.0
+11000000.10101000.00000001.00000000
+```
+/24 means:
+
+- First 24 bits = network
+- Remaining 8 bits = hosts
+
+```
+Network bits                 Host bits
+11000000.10101000.00000001 | 00000000
+```
+
+Since there are 8 host bits, so total posible address is calculated as:
+```
+2^8 = 256 addresses
+```
+
+That means:
+
+- Network: 192.168.1.0
+- First usable: 192.168.1.1
+- Last usable: 192.168.1.254
+- Broadcast: 192.168.1.255
+
+So, total device that can cxonnect to this network is 254. And if message is snet to the ip 192.168.0.255 then all the device connected to the network receives it as it is the broadcast address.
+
+*Note:*
+
+>/24: Its also called Netmask
+
+
+**Question.** 
+
+```
+How many device is possible in this CIDR 10.0.0.0/16 ?
+
+Total bits allowed for host is 16. Which mean:
+
+Network bits: 16
+
+Hotst bits: 16
+
+that means: 10.0.x.x, 3rd and 4th octet are free to vary
+
+In host bits:
+
+Minimum:
+00000000.00000000
+=
+10.0.0.0
+
+
+Maximum:
+11111111.11111111
+=
+10.0.255.255
+
+
+So the range of ip address is: 
+
+10.0.0.0
+↓
+10.0.255.255
+
+Total addresses possible = 2^16 => 65,536
+Total device possible = 2^16 - 2 => 65,534
+```
+
+Question.
+
+```
+Given IP address 192.168.1.70/27.
+What is the ramge of IP address, and how many devices are supported ?
+
+/27: It means networkm bits are made of 27 bits and host bits is made of 32-27=5 bits
+
+Comvert the IP to binary:
+
+192.168.1.70
+↓
+11000000.10101000.00000001.01000110
+
+Now divide after 27 bits.
+
+11000000.10101000.00000001.010 | 00110
+                                ↑
+                           split here
+
+See, the last octet is split into: 010 | 00110
+The first 3 bts belong to the network. The remaioning 5 belongs to the host.
+
+To get the the network address:
+Keep the network bits the same, but set all the host bits to 0.
+
+So it becomes: 11000000.10101000.00000001.01000000
+
+01000000 => 64
+
+So network address is: 192.168.1.64
+
+To get the broadcast address:
+Keep the network bits the same, but set all the host bits to 1.
+
+So it becomes: 11000000.10101000.00000001.01011111
+01011111 => 95
+
+So broadcast address is: 192.168.1.95
+
+So total address possible for this subnet is: 64 to 95 = 32 address
+Total device possible: 32-2 = 30
+```
+
+
+#### Subnet mask?
+
+A subnet mask is another way of representing the network portion of an IP address. It is equivalent to CIDR notation.
+
+The subnet mask tells the computer: **"These bits belong to the network, and these bits belong to the host."**
+
+
+```
+/24
+
+can be written as 
+
+255.255.255.0
+```
+It is becasue, 255 = 11111111
+
+So, 255.255.255.0
+
+becomes
+
+```
+11111111
+11111111
+11111111
+00000000
+
+
+24 1s and 8 0s
+
+The 1s mean:
+This bit belongs to the network.
+
+The 0s mean:
+This bit belongs to the host.
+
+
+So, 
+255.255.255.0 is exactly the same as /24
+```
+
+Question.
+
+```
+What is the subnet mask for /27
+
+27: network bits 27, host bits 5
+
+So 27 1s and 5 0s
+
+11111111
+11111111
+11111111
+11100000
+
+11100000 => 224
+
+So subnet mask = 255.255.255.224
+```
+
+#### Creating a VPC with Subnets
+
+Lets say we create a VPC with CIDR block: 10.0.0.0/16
+
+Now within this vpc we can huve multiple subnets. So for those subnets too we have to assign CIDR block.
+
+Let's say we create three subnets:
+```
+Subnet 1: 10.0.1.0/24
+Subnet 2: 10.0.10.0/24
+Subnet 3: 10.0.120.0/24
+
+
+Each subnet here having 32 addresses.
+```
+
+Can we create subnet with CIDR 10.1.1.0/24?
+
+No. Because 10.1.x.x is outside of the VPC range which is 10.0.x.x
+
+We also cannot create overlapping subnet CIDRs
+
+
+![alt text](/images/aws2.png)
+
+### Practice: Create this network in AWS
+
+![alt text](/images/aws3.png)
