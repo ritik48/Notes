@@ -34,6 +34,66 @@ Buckets:
 - Region based
 - We can host statuc websites
 
+#### Regions and Availability zones (Azs)
+
+**Regions:** A Region is a separate geographic location where AWS operates.
+Example:
+```
+ap-south-1 → Mumbai
+ap-south-2 → Hyderabad
+us-east-1 → N. Virginia
+eu-west-1 → Ireland
+```
+
+Each region has multiple Availability zones.
+
+**Availability zones:** An Availability Zone is one or more physically separate data centers inside a region.
+
+Example:
+```
+Region: Mumbai (ap-south-1)
+
+├── ap-south-1a
+├── ap-south-1b
+└── ap-south-1c
+```
+
+Why multiple AZs?
+
+Suppose you launch an EC2 instance only in ap-south-1a.
+```
+ap-south-1
+
+AZ A
+ EC2
+
+AZ B
+
+AZ C
+```
+If AZ A has a power failure, then the application goes down.
+
+Insteade, launch instances in multiple AZs:
+```
+ap-south-1
+
+AZ A
+ EC2
+
+AZ B
+ EC2
+
+AZ C
+ Load Balancer
+```
+
+Now if AZ A fails:
+
+- Traffic automatically goes to AZ B.
+- Application stays available.
+
+This is called high availability.
+
 #### IP (Internet Protocol)
 
 1. Private IP
@@ -155,7 +215,7 @@ A route table tells traffic where to go.
 
 #### Security Groups
 
-It acts as a firewall for an EC2 Instance.
+It acts as a firewall for an EC2 Instance. With this, we can define only what all traffic is "allowed". we cannot add any "deny" rule.
 
 Example:
 
@@ -175,6 +235,27 @@ A Network ACL is a firewall for an entire subnet.
 | Instance-level   | Subnet-level         |
 | Stateful         | Stateless            |
 | Only allow rules | Allow and deny rules |
+
+In NACL we defines rules with **Rule Number**, and the smalest rule number takes the priority.
+
+Example of rules in NACL:
+| Rule # | Protocol | Source            | Port | Action |
+| -----: | -------- | ----------------- | ---- | ------ |
+|    100 | TCP      | `0.0.0.0/0`       | 80   | ALLOW  |
+|    200 | TCP      | `192.168.1.10/32` | 80   | DENY   |
+|      * | All      | All               | All  | DENY   |
+
+A request comes from 192.168.1.10 to port 80.
+AWS checks:
+
+1. Rule 100 → Does it match?
+    - Source 0.0.0.0/0 includes 192.168.1.10 ✅
+    - Port 80 matches ✅
+    - Action = ALLOW
+2. AWS stops here.
+    - Rule 200 is never checked, even though it is more specific.
+
+So the request is allowed.
 
 ---
 
@@ -408,3 +489,320 @@ We also cannot create overlapping subnet CIDRs
 ### Practice: Create this network in AWS
 
 ![alt text](/images/aws3.png)
+
+---
+
+#### Load Balancer(ALB)
+
+A Load Balancer distributes incoming traffic across multiple backend servers (EC2 instances) to improve availability, fault tolerance, and scalability.
+
+Without a Load Balancer:
+
+- One EC2 handles all traffic.
+- If the EC2 fails → application goes down.
+- Heavy traffic can overload the server.
+
+With a Load Balancer:
+
+- Traffic is distributed across multiple EC2 instances.
+- If one EC2 fails, requests are sent to healthy instances.
+- Applications can scale horizontally.
+
+Load balancer lets us do different Routings like:
+- Path based (/api, /admin)
+- host based (api.example.com, shop.example.com)
+
+
+Flow
+```
+Users
+   │
+   ▼
+Application Load Balancer
+   │
+   ▼
+Target Group
+   ├── EC2-1
+   ├── EC2-2
+   └── EC2-3
+```
+
+Features:
+- Distributes traffic across multiple Availability Zones.
+- Supports SSL/TLS termination.
+- Performs health checks.
+- Supports path-based routing (/api, /admin).
+- Supports host-based routing (api.example.com, shop.example.com).
+
+#### Target Group
+
+A Target Group is a logical group of backend resources that receives traffic from a Load Balancer.
+
+Targets can be:
+
+- EC2 instances
+- IP addresses
+- Lambda functions
+
+Why is it needed?
+
+The Load Balancer does not directly send traffic to EC2 instances.
+
+Instead:
+```
+Load Balancer
+      │
+      ▼
+Target Group
+      │
+      ├── EC2-1
+      ├── EC2-2
+      └── EC2-3
+```
+
+The Target Group keeps track of:
+
+- Registered targets
+- Health status
+- Port number
+- Protocol
+
+Suppose:
+```
+EC2-1 ✓ Healthy
+
+EC2-2 ❌ Crashed
+
+EC2-3 ✓ Healthy
+```
+The Target Group reports this to the Load Balancer.
+
+Now the Load Balancer sends traffic only to:
+```
+EC2-1
+
+EC2-3
+```
+
+
+#### Auto Scaling Groups (ASG)
+
+An Auto Scaling Group (ASG) automatically launches or terminates EC2 instances based on demand or health.
+
+With ASG we can define:
+1. Scaling Policies
+    ```
+    CPU > 70%
+    Launch 2 EC2 instances
+    ```
+    ```
+    CPU < 20%
+    Terminate 1 EC2 instance
+    ```
+
+2. Desired, Minimum & Maximum Capacity
+    - Minimum: ASG never goes below this number.
+    - Desired: Number of instances ASG tries to maintain.
+    - Maximum: Upper limit of instances.
+3. Health Monitoring
+    - If an EC2 instance becomes unhealthy:
+    ```
+    EC2 crashes
+      │
+      ▼
+    ASG terminates it
+      │
+      ▼
+    Launches a new EC2 automatically
+    ```
+
+**Integration with Target Group**
+
+When ASG launches a new EC2:
+```
+ASG
+ │
+ ▼
+Creates EC2
+ │
+ ▼
+Registers with Target Group
+```
+When EC2 is terminated:
+```
+ASG
+ │
+ ▼
+Removes EC2
+ │
+ ▼
+Removed from Target Group
+```
+
+#### Bastion Host
+
+A Bastion Host is a **public EC2 instance** used as a secure **entry point** to access EC2 instances located in **private subnets**.
+
+Why is it needed?
+
+Private EC2 instances:
+
+- Have no public IP.
+- Cannot be accessed directly from the internet.
+
+Instead, connect through a Bastion Host.
+
+Architectuire
+```
+Internet
+    │
+    ▼
+Bastion Host
+(Public Subnet)
+    │
+SSH
+    ▼
+Private EC2
+```
+
+Benefits
+- Only one EC2 is exposed to the internet.
+- Private EC2 instances remain inaccessible from the internet.
+- Improves security.
+
+We already have a Load Balancer which takes care of the requests received from users, then why we need Bastion hosts?
+
+- A Load Balancer is for **application traffic.**
+
+- A Bastion Host is for **administrative access.**
+
+Now imagine you need to:
+
+- Check logs
+- Restart a service
+- Debug an issue
+- Install software
+
+You need SSH access.
+
+The Load Balancer cannot help with this.
+
+A Load Balancer only forwards application traffic.
+
+It does not let you SSH into an EC2 instance.
+
+
+---
+
+### Route 53
+
+Route 53 in AWS provides DNS as a Service.
+Why is it called Route 53?
+- Route → Routes users to the correct application or server.
+- 53 → DNS uses port 53 (UDP and TCP).
+
+What can Route 53 do?
+1. Domain Registration
+    - You can buy domains directly from AWS
+
+2. DNS Hosting
+    - Even if you bought the domain elsewhere (GoDaddy, Namecheap, etc.), you can host its DNS records in Route 53.
+3. Health Checks
+    - Route 53 can continuously check whether an endpoint is healthy.
+
+#### Hosted Zone
+
+A Hosted Zone is a container for all DNS records of a domain.
+Example:
+example.com
+
+```
+Hosted Zone (for example.com)
+├── A Record
+├── AAAA Record
+├── CNAME
+├── MX
+├── TXT
+└── NS
+```
+
+Common DNS Record Types
+
+1. **A Record:** Maps a domain to an IPv4 address.
+    ```
+      example.com
+            │
+            ▼
+      54.23.11.8
+    ```
+2. **AAAA Record:** Maps a domain to an IPv6 address.
+3. **CNAME:** Makes one domain point to another domain.
+    ```
+      blog.example.com
+          │
+          ▼
+      myblog.wordpress.com
+    ```
+4. **TXT Record:**
+
+    Stores text data, commonly used for Domain verification.
+
+
+#### Name Server
+
+An NS record tells the internet:
+>"Which DNS server is responsible for answering questions about this domain?"
+Think of it like this:
+- Domain name = example.com
+- NS record = "Go ask these servers for information about example.com.
+
+Example:
+Suppose you own: `example.com`
+
+Its NS records might be:
+```
+example.com
+NS ns-123.awsdns-45.com
+NS ns-456.awsdns-78.net
+NS ns-789.awsdns-90.org
+NS ns-321.awsdns-12.co.uk
+```
+
+These are AWS Route 53 name servers.
+
+When someone types `example.com`, the DNS resolver eventually learns:
+>"The DNS records for example.com are managed by these four AWS name servers."
+It then asks one of those servers:
+>"What's the IP address for example.com?"
+
+The Route 53 name server replies with the appropriate DNS record (such as an A record or Alias record).
+
+So flow is roughly like this:
+
+```
+Browser
+   │
+   ▼
+DNS Resolver
+   │
+   ▼
+Root DNS Server
+   │
+   ▼
+".com" TLD Server
+   │
+   │ "Who manages example.com?"
+   ▼
+Returns NS records:
+ns-123.awsdns-45.com
+ns-456.awsdns-78.net
+   │
+   ▼
+Route 53 Name Server
+   │
+   │ "What's the IP for www.example.com?"
+   ▼
+Returns:
+54.23.10.5
+```
+
