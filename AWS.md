@@ -474,7 +474,7 @@ Subnet 2: 10.0.10.0/24
 Subnet 3: 10.0.120.0/24
 
 
-Each subnet here having 32 addresses.
+Each subnet contains 256 IP addresses.
 ```
 
 Can we create subnet with CIDR 10.1.1.0/24?
@@ -806,3 +806,108 @@ Returns:
 54.23.10.5
 ```
 
+---
+
+#### Amazon ECR (Elastic Container Registry)
+
+ECR is AWS's private Docker image repository.
+
+#### Amazon ECS (Elastic Container Service)
+
+ECS is AWS's container orchestration service. Its job is to run and manage your Docker containers.
+
+> ECS doesn't store images—it pulls them from ECR (or another registry) and runs them.
+
+Example flow:
+```
+Docker Image
+      │
+      ▼
+Amazon ECR
+      │
+ECS pulls image
+      ▼
+Runs Container
+```
+
+##### ECS Concepts
+
+**Cluster:**
+
+A cluster is a logical grouping of resources where your containers run.
+
+```
+ECS Cluster
+    │
+ ┌──┴──┐
+ │     │
+Service A
+Service B
+```
+
+**Task Definition:**
+
+A task definition is like a blueprint for running containers.
+
+It specifies things like:
+
+- Docker image
+- CPU
+- Memory
+- Environment variables
+- Port mappings
+
+Example:
+```
+Image:
+backend:v1
+
+CPU:
+512
+
+Memory:
+1024 MB
+
+Port:
+3000
+```
+
+**Task:**
+
+A task is a running instance of a task definition.
+
+**Service:**
+
+A service ensures a desired number of tasks are always running.
+
+Suppose you configure: `Desired Tasks = 3`
+
+ECS keeps three tasks running.
+
+If one fails: ECS launches another one automatically.
+
+#### Where Do Containers Actually Run?
+
+ECS offers two options:
+
+1. EC2 Launch Type
+
+    You manage the EC2 servers.
+    You're responsible for:
+
+    - OS updates
+    - Scaling EC2
+    - Patching
+    - Capacity management
+
+2. Fargate Launch Type
+
+    AWS manages the servers.
+
+    You simply say: "Run my container."
+
+**Fargate:**
+
+AWS Fargate is a serverless compute engine for containers.
+
+It lets you run applications without managing virtual machines or servers. You work with it through Amazon ECS or Amazon EKS by setting CPU and memory needs.
