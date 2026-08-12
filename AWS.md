@@ -808,6 +808,47 @@ Returns:
 
 ---
 
+#### AWS CLI
+
+AWS Command Line Interface (AWS CLI) is a unified tool to manage your AWS services.
+
+After installing aws cli, configure your account.
+
+##### Configure account
+`aws configure`
+- It will ask fior these:
+    ```
+   AWS Access Key ID: AKIA...
+    AWS Secret Access Key: ...
+    Default region name: ap-south-1
+    Default output format: json
+    ```
+
+The first account you setup is named as `default`.
+
+You can configyre another account like this:
+`aws configure --profile <profile-name>`
+
+#### Check connected accounts
+
+`aws configure list-profiles`
+
+#### Check details of a profile
+
+`aws sts get-caller-identity --profile <profile-name>`
+- It will give response like this:
+    ```
+    {
+        "UserId": "********************",
+        "Account": "**************",
+        "Arn": "arn:aws:iam::000000:user/ritik_raj"
+    }
+    ```
+
+Now, whenever you exeute a command, lets says you want to create an EC2, then with the command you have to specify the `--profile` argument, so that the command does not create EC2 or any resource in a wrong aws account.
+
+--- 
+
 #### Amazon ECR (Elastic Container Registry)
 
 ECR is AWS's private Docker image repository.
@@ -911,3 +952,98 @@ ECS offers two options:
 AWS Fargate is a serverless compute engine for containers.
 
 It lets you run applications without managing virtual machines or servers. You work with it through Amazon ECS or Amazon EKS by setting CPU and memory needs.
+
+
+### EKS
+
+EKS (Elastic Kubernetes Service) is a managed service that lets you run Kubernetes on AWS without managing the control plane.
+
+EKS automates cluster availability, scaling, and security patching, allowing you to focus purely on deploying and scaling your containerized applications.
+
+#### eksctl
+
+It is a command-line tool designed to create and manage EKS clusters with single commands.
+
+#### Creating cluster with eksctl
+
+`eksctl create cluster --name first-cluster --region ap-sout-1 --nodes 2 --profile <profile-name>`
+
+#### List available clusters
+
+`aws eks list-clusters`
+
+#### Check node details that eksctl created
+
+`eksctl get nodegroup --cluster <cluster-name> --regios <region-name> --profile <profile-name>`
+
+```
+CLUSTER         NODEGROUP       STATUS  CREATED                 MIN SIZE        MAX SIZE        DESIRED CAPACITY        INSTANCE TYPE   IMAGE ID                ASG NAME                                                TYPE
+first-cluster   ng-25c1d8e8     ACTIVE  2026-08-12T17:13:53Z    2               2               2                       m5.large        AL2023_x86_64_STANDARD  eks-ng-25c1d8e8-4ccffb7b-a6b2-af77-ea6c-8e001429f885    managed
+```
+
+Now, when you created cluster then eksctl automatically creates a lot of resource that ckluster needs, like vpc, subnets, ec2, and other things.
+
+Now, we have lots of options to specify while running the create cluster command. We can specify vps, subnet, instance type and many things.
+
+#### Cleanup the resources
+
+`kubectl delete -f app.yaml`
+
+- remove everything from current cluster
+    `kubectl delete all --all --all-namespaces`
+
+- Delete the cluster
+    `eksctl delete cluster --name <cluster-name> --region <region-name> --profile <profile-name>`
+
+**IMPORTANT:**
+
+When I ran this `eksctl delete cluster` command, then it should have deleted all the reosurces like vps, subnets, and others that was created. But, when I ran this, then I didnt see any error in the command line. So to veify if things were cleaned up, I went to aws and checked the vpcs, and saw its still there. So, I asked claude about it and found the below solution.
+
+###### What is CloudFormation?
+
+CloudFormation is AWS's **infrastructure-as-code service**. Instead of manually clicking around the AWS console to create a VPC, subnets, security groups, IAM roles, etc., you describe all of that in a template (JSON/YAML), and CloudFormation creates, tracks, and manages the entire group of resources as a single unit called a stack.
+
+**Key idea:** a stack is a collection of AWS resources CloudFormation treats as one deployable unit. Delete the stack → it tries to delete every resource inside it, in the correct dependency order.
+
+**What eksctl actually does behind the scenes?**
+
+When you ran eksctl create cluster, eksctl didn't create your VPC/EKS cluster/subnets directly via raw API calls — it generated CloudFormation templates and handed them to CloudFormation to execute. That's why you saw stack names like:
+
+**eksctl-first-cluster-cluster** → the main stack: VPC, subnets, security groups, EKS control plane, IAM roles
+
+**eksctl-first-cluster-nodegroup-ng-xxxxx** → a separate stack: the worker node EC2 instances/ASG
+
+This is why eksctl delete cluster is really just telling CloudFormation to delete those two stacks in order (nodegroup first, then cluster — since nodes depend on the cluster/VPC existing).
+
+**What actually went wrong?**
+
+From the output, the exact reason was:
+
+StackStatusReason: "The following resource(s) failed to delete: [ControlPlane]."
+
+So the EKS control plane resource itself refused to delete on the first attempt. This is a fairly common, somewhat unpredictable AWS issue. Common root causes (not 100% confirmed which hit you, but these are the usual suspects):
+
+**Leftover ENIs (Elastic Network Interfaces)** — EKS attaches ENIs to your VPC subnets so the control plane can talk to worker nodes. If any of these are still "in use" or not cleanly detached (often due to timing issues or something still referencing them), CloudFormation can't delete the control plane, which in turn blocks deletion of the security groups/subnets/VPC that depend on it.
+
+**Timing/eventual consistency** — Sometimes AWS's EKS control plane deletion is just slow internally and a first attempt fails due to a race condition, but a retry succeeds because the underlying resource has since finished cleaning up.
+Dangling Load Balancers from Kubernetes Services — if you'd created a Service of type LoadBalancer, its ELB isn't tracked by CloudFormation and can block VPC teardown. (Not confirmed as your cause here, but worth knowing for next time.)
+
+**Cascading effect:** because CloudFormation stops the whole stack deletion when one resource fails, everything else in that stack — VPC, subnets, security groups — was left dangling too, even though nothing was technically wrong with them. That's why you saw the VPC/subnets still present after the "cluster deleted" message.
+
+**The solution that worked:**
+
+- Checked the stack status directly to find the actual blocking resource:
+powershell
+   `aws cloudformation describe-stacks --region ap-south-1 --profile personal`
+
+    This revealed DELETE_FAILED with reason [ControlPlane].
+
+- Simply retried the stack deletion:
+
+    `aws cloudformation delete-stack --stack-name eksctl-first-cluster-cluster --region ap-south-1 --profile personal`
+- Polled until it succeeded:
+    `aws cloudformation describe-stacks --stack-name eksctl-first-cluster-cluster --region ap-south-1 --profile personal`
+
+    Eventually this returns "stack does not exist" — confirming full deletion of the VPC, subnets, security groups, and control plane.
+
+So in this case, the fix was simply **retry the delete** — CloudFormation's earlier attempt had a transient failure (most likely an ENI or timing issue that resolved itself), and the second attempt went through cleanly.

@@ -75,12 +75,27 @@ If the Pod is deleted, **both containers are deleted together.**
 
 ### Kubernetes Architecture
 
-Kubernetes Cluster = Control Pane (brain) + Worker Nodes (does the job)
+Kubernetes Cluster = Control Plane (brain) + Worker Nodes (does the job)
 
 A Kubernetes cluster is made up of two main parts:
 
 - Control Plane (the brain)
 - Worker Nodes (the workers)
+
+
+#### Node:
+
+- Node = one Virtual Machine
+- Node has CPU, Memory, Network, Runtime (container runtime)
+- Pods never run directly on cluster, they always run on a node
+- If node dies, pods on that node also die.
+
+#### Cluster:
+
+- Cluster = control plane + one or more nodes
+- Its a group of machines
+- Cluster cab span 1 node or 1000 nodes
+- You deploy apps to the cluster, not to nodes directly
 
 ```
                  Kubernetes Cluster
@@ -98,7 +113,7 @@ A Kubernetes cluster is made up of two main parts:
     Containers    Containers    Containers
 ```
 
-#### 1. Control Pane
+#### 1. Control Plane
 
 | Component              | Purpose                                                                                              |
 | ---------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -215,7 +230,7 @@ What Services does:
 - Lets other apps inside the cluster talk to it
 - Lets you expose it to the browser(NodePort)
 
-Service="Give my app a stable address so browsers and apps can react it"
+Service="Give my app a stable address so browsers and apps can reach it"
 
 Service Types:
 - ClusterIP
@@ -287,7 +302,7 @@ This happens because of replica sets.
 And when we create a deployment, then replica set is created by default with desired stats as 1.
 
 Command to display the replica sets: `kubectl get rs` or `kubectl get replicaset`<br>
-Complete detail of a replica set: `kubectl describe rs_name`
+Complete detail of a replica set: `kubectl describe rs rs_name`
 
 How to scale the pods?
 
@@ -590,7 +605,7 @@ secret.yaml
         - name: frontend
           image: ritik48/ms-frontend
           env:
-            - name: BACKEND_MESSAGE 
+            - name: BACKEND_MESSAGE_ENV 
               valueFrom: 
                 configMapKeyRef:
                   name: sample-config
@@ -600,6 +615,27 @@ secret.yaml
                 secretKeyRef:
                   name: sample-secret
                   key: PASSWORD
+          ports:
+            - containerPort: 80
+```
+
+Here, 
+
+- `sample-config`: is the ConfigMap name. 
+- `BACKEND_MESSAGE_ENV`: the environment variable name that gets set inside your container.
+- `BACKEND_MESSAGE`: the key inside your ConfigMap's data
+
+To load all the nev form configmap:
+
+
+  ```yaml
+    spec:
+      containers:
+        - name: frontend
+          image: ritik48/ms-frontend
+          envFrom:
+            - configMapRef:
+                name: config-map
           ports:
             - containerPort: 80
 ```
@@ -735,3 +771,16 @@ Now we have to do, `kubectl apply -f ingress.yml`
 
 But, this doesn't mean it will start working. First, we need to have ingress controller installed only after that this ingress resource will be used by ingress controller and will work.
 
+#### check all the configured clusters
+
+`kubectl config get-contexts`
+```
+CURRENT   NAME             CLUSTER          AUTHINFO         NAMESPACE
+*         docker-desktop   docker-desktop   docker-desktop
+
+```
+> The * means this is the cluster kubectl is currently using.
+
+#### Switch to another cluster
+
+`kubectl config use-context <context-name>`
