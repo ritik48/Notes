@@ -824,6 +824,8 @@ Now we have to do, `kubectl apply -f ingress.yml`
 
 But, this doesn't mean it will start working. First, we need to have ingress controller installed only after that this ingress resource will be used by ingress controller and will work.
 
+> Note: When we use Ingress Controller then all the service within it should be using ClusterIP and not LoadBalancer
+
 #### check all the configured clusters
 
 `kubectl config get-contexts`
