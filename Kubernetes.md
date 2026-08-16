@@ -695,7 +695,12 @@ Benefits:
 
 **Ingress controller**
 
-The Ingress Controller reads the Ingress rules and performs the routing.
+Ingress Controller is the actual running software that reads Ingress rules and handles real HTTP traffic routing.
+
+Ingress controller:
+- Runs as Pods
+- Is managed by a Deployment
+- Exposed via a Service
 
 Popular controllers:
 
@@ -764,6 +769,54 @@ spec:
                 name: admin-service
                 port:
                   number: 80
+
+```
+
+**Ingress with Regex & Reqriting Rules using NGINX Controller**
+
+This ingress does the following:
+- Receives: GET `/api/users`
+- Checks rules (top to bottom)
+- Matches: `/api/(.*)`
+- Captures: `"users"` in `$1`
+- Applies reqrite-target: `/$1`
+- Transforms to: GET `/users`
+- Forward to: `service-a:80`
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: myapp-ingress
+  annotations:
+    # Required for regex paths
+    nginx.ingress.kubernetes.io/use-regex: "true"
+
+    # Rewrite path using capture groups
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: myapp.com
+      http:
+          - path: /api/(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 80
+
+          - path: /(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+
 
 ```
 
