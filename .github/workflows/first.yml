@@ -1,0 +1,13 @@
+name: Notes Pipeline
+
+on:
+  push:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: What happened?
+        run: echo "Notes got updated. Yay!!!"
